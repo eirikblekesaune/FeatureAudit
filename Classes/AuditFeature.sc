@@ -2,7 +2,6 @@ AuditFeature{
 	var <name;
 	var <featureArgs;
 	var <data;
-	var <numItems;
 	var <specs;
 
 	classvar specs;
@@ -11,21 +10,21 @@ AuditFeature{
 		this.initSpecs();
 	}
 
-	*new{arg name, featureArgs, mirFile, startIndex = 0, numItems = 1, specs;
-		^super.new.init(name, featureArgs, mirFile, startIndex, numItems, specs);
-   	}
-
-	init{arg name_, featureArgs_, mirFile, startIndex, numItems_, specs_;
-		name = name_;
-		featureArgs = featureArgs_;
-		numItems = numItems_;
-		specs = specs_ ? this.class.getSpecs(name, featureArgs) ? [];
-		if(mirFile.notNil, {
-			this.importDataFromMirFile(mirFile, startIndex, numItems_);
-		});
+	*new{arg name, featureArgs, data, specs;
+		^super.newCopyArgs(name, featureArgs, data).init(specs);
 	}
 
-	importDataFromMirFile{arg mirFile, startIndex = 0, numItems = 1;
+	*newFromMirFile{arg name, featureArgs, mirFile, startIndex, numItems,  specs;
+		var data;
+		data = this.getDataFromMirFile(mirFile, startIndex, numItems);
+		^this.new(name, featureArgs, data, specs);
+	}
+
+	init{arg specs_;
+		specs = specs_ ? this.class.getSpecs(name, featureArgs) ? [];
+	}
+
+	*getDataFromMirFile{arg mirFile, startIndex = 0, numItems = 1;
 		var result;
 		if(numItems == 1, {
 			result = mirFile.featuredata.copySeries(
@@ -41,7 +40,11 @@ AuditFeature{
 				);
 			};
 		});
-		^this.setData(result);
+		^result;
+	}
+
+	numItems{
+		^data.size;
 	}
 
 	//returns boolean true if data was valid
