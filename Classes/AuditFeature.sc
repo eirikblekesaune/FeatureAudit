@@ -1,27 +1,24 @@
 AuditFeature{
 	var <name;
-	var <settings;
+	var <featureArgs;
 	var <data;
 	var <numItems;
-	var <parameterSpecs;
 
-	classvar <parameterSpecs;
 	classvar itemSpecs;
 
 	*initClass{
 		this.initSpecs();
 	}
 
-	*new{arg name, settings, mirFile, startIndex = 0, numItems = 1, parameterSpecs, itemSpecs;
-		^super.new.init(name, settings, mirFile, startIndex, numItems, parameterSpecs, itemSpecs);
+	*new{arg name, featureArgs, mirFile, startIndex = 0, numItems = 1, itemSpecs;
+		^super.new.init(name, featureArgs, mirFile, startIndex, numItems, itemSpecs);
    	}
 
-	init{arg name_, settings_, mirFile, startIndex, numItems_, parameterSpecs_, itemSpecs_;
+	init{arg name_, featureArgs_, mirFile, startIndex, numItems_, itemSpecs_;
 		name = name_;
-		settings = settings_;
+		featureArgs = featureArgs_;
 		numItems = numItems_;
-		parameterSpecs = parameterSpecs_ ? this.class.parameterSpecs[name] ? [];
-		itemSpecs = itemSpecs_ ? this.class.getItemSpecs(name, settings) ? [];
+		itemSpecs = itemSpecs_ ? this.class.getItemSpecs(name, featureArgs) ? [];
 		if(mirFile.notNil, {
 			this.importDataFromMirFile(mirFile, startIndex, numItems_);
 		});
@@ -70,7 +67,7 @@ AuditFeature{
 		^data[atItem];
 	}
 
-	makeView{arg parent, bounds, settings;
+	makeView{arg parent, bounds, featureArgs;
 	}
 
 	=={arg what;
@@ -81,108 +78,23 @@ AuditFeature{
 	}
 
 	hash{
-		^this.instVarHash([\name, \settings]);
+		^this.instVarHash([\data, \featureArgs]);
 	}
 
-	featureArgs{ ^[name] ++ settings; }
-
 	*initSpecs{
-		//specs are based on a combination is of the default sform SCMIR documentation
-		//and the actual SCMIR Audiot file code, with that latter taking presedence.
-		parameterSpecs = VTMOrderedIdentityDictionary[
-			\MFCC -> VTMOrderedIdentityDictionary[
-				\numcoeff -> ControlSpec(2, 42, step: 1, default: 13)
-			],
-			\Chromagram -> VTMOrderedIdentityDictionary[
-				\n -> ControlSpec(2, 53, default: 12, step: 1, units: 'divisions'),
-				\tuningbase -> ControlSpec(1.0, 120.0, default: 32.703195662575, units: 'Hz'),
-				\octaves -> ControlSpec(1, 16, default: 8, step: 1, units: 'octaves'),
-				\integrationflag -> ControlSpec(0, 1, default: 0, step: 1),
-				\coeff -> ControlSpec(0.001, 1.0, default: 0.9),
-				\octaveratio -> ControlSpec(1, 10, default: 2, step: 1),
-				\perframenormalize -> ControlSpec(0, 1.0, default: 0)
-			],
-			\KeyClarity -> VTMOrderedIdentityDictionary[
-				\keydecay -> ControlSpec(0.01, 10.0, default: 2.0, units: 'secs'),
-				\chromaleak -> ControlSpec(0.0, 1.0, default: 0.5)
-			],
-			\KeyTrack -> VTMOrderedIdentityDictionary[
-				\keydecay -> ControlSpec(0.01, 10.0, default: 2.0, units: 'secs'),
-				\chromaleak -> ControlSpec(0.0, 1.0, default: 0.5)
-			],
-			\KeyMode -> VTMOrderedIdentityDictionary[
-				\keydecay -> ControlSpec(0.01, 10.0, default: 2.0, units: 'secs'),
-				\chromaleak -> ControlSpec(0.0, 1.0, default: 0.5)
-			],
-			\SpectralEntropy -> [], // no args
-			//With SCMIR these are hard coded, so setting them won't have any effect
-			//\Tartini -> VTMOrderedIdentityDictionary[
-			//	\threshold -> ControlSpec(0.0, 1.0, default: 0.93, units: 'amp'),
-			//	\n -> ControlSpec(2, 2048, default: 2048),
-			//	\k -> ControlSpec(0, 2048, default: 0),
-			//	\overlap -> ControlSpec(2, 1024, default: 1024),
-			//	\smallCutoff -> ControlSpec(0.1, 1.0, default: 0.5)
-			//],
-			\Tartini -> [],
-			\Tempo -> [], //no args in SCMIR
-			\Loudness -> VTMOrderedIdentityDictionary[
-				\smask -> ControlSpec(0.0, 1.0, default: 0.25),
-				\tmask -> ControlSpec(0.0, 1.0, default: 1.0)
-			],
-			\SensoryDissonance -> VTMOrderedIdentityDictionary[
-				\maxpeaks -> ControlSpec(1, 250, default: 100, step: 1),
-				\peakthreshold -> ControlSpec(0.0, 1.0, default: 0.1),
-				\norm -> ControlSpec(0.0, 10.0, default: 1.0),
-				\clamp -> ControlSpec(0.0, 1.0, default: 1.0)
-			],
-			\SpecCentroid -> [],// no args
-			\SpecPcile -> VTMOrderedIdentityDictionary[
-				\fraction -> ControlSpec(0.0, 1.0, default: 0.5),
-				\interpolate -> ControlSpec(0, 1, default: 0, step: 1)
-			],
-			\SpecFlatness -> [], // no args
-			\FFTCrest -> VTMOrderedIdentityDictionary[
-				\freqlo -> ControlSpec(0.0, 50000.0, default: 0.0),
-				\freqhi -> ControlSpec(0.0, 50000.0, default: 50000.0)
-			],
-			\FFTSpread -> [],//no args
-			\FFTSlope -> [], // no args
-			\Onsets -> VTMOrderedIdentityDictionary[
-				\odftype -> OptionsSpec(
-					[\power, \magsum, \complex, \rcomplex, \phase, \wphase, \mkl],
-				   	default: \rcomplex
-				)
-			],
-			\RMS -> [], //no args
-			\ZCR -> [], //no args
-			\AttackSlope -> [], // no args
-			\Transient -> VTMOrderedIdentityDictionary[
-				\branchthreshold -> ControlSpec(0.0, 1.0, default: 0.5),
-				\prunethreshold -> ControlSpec(0.0, 1.0, default: 0.1)
-			],
-			\OnsetStatistics -> VTMOrderedIdentityDictionary[
-				\windowsize -> ControlSpec(0.1, 5.0, default: 2.0, units: \seconds),
-				\threshold -> ControlSpec(0.0, 1.0, default: 0.125, units: 'amp'),
-			],
-			\BeatStatistics -> VTMOrderedIdentityDictionary[
-				\leak -> ControlSpec(0.01, 0.999, default: 0.95),
-				\numpreviousbeats -> ControlSpec(0, 32, default: 4)
-			]
-		];
-
 		//the return values from the feature analysis are based on SCMIR documetnation and SCMIRAudioFile
 		//implementation
 		itemSpecs = VTMOrderedIdentityDictionary[
-			\MFCC -> {arg settings;
+			\MFCC -> {arg featureArgs;
 				var result;
 				var numItems;
-				if(settings.isNil, {
-					numItems = parameterSpecs[\MFCC][\numcoeff].default;
+				if(featureArgs.isNil, {
+					numItems = featureArgs.at(\numcoeff);
 				}, {
-					if(settings.isEmpty, {
-						numItems = parameterSpecs[\MFCC][\numcoeff].default;
+					if(featureArgs.isEmpty, {
+						numItems = AuditFeatureArgs.specs[\MFCC][\numcoeff].default;
 					}, {
-						numItems = settings.first;
+						numItems = featureArgs.at(\numcoeff);
 					});
 				});
 				result = VTMOrderedIdentityDictionary.new;
@@ -194,15 +106,15 @@ AuditFeature{
 				});
 				result;
 			},
-			\Chromagram -> {arg settings;
+			\Chromagram -> {arg featureArgs;
 				var result, numItems;
-				if(settings.isNil, {
-					numItems = parameterSpecs[\Chromagram][\n].default;
+				if(featureArgs.isNil, {
+					numItems = featureArgs.at(\n);
 				}, {
-					if(settings.isEmpty, {
-						numItems = parameterSpecs[\Chromagram][\n].default;
+					if(featureArgs.isEmpty, {
+						numItems = AuditFeatureArgs.specs[\Chromagram][\n].default;
 					}, {
-						numItems = settings.first;
+						numItems = featureArgs.at(\n);
 					});
 				});
 				result = VTMOrderedIdentityDictionary.new;
