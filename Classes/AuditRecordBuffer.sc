@@ -29,7 +29,8 @@ AuditRecordBuffer : AuditBuffer {
 		headerFormat = "aiff",
 		sampleFormat = "int32",
 		target,
-		addAction = \addToTail
+		addAction = \addToTail,
+		analysisArgs
 		|
 		recRoutine = fork{
 			var cond = Condition.new;
@@ -93,11 +94,12 @@ AuditRecordBuffer : AuditBuffer {
 			});
 
 			recDuration.wait;
-			this.stopRecording(action);
+			this.stopRecording(action, analysisArgs: analysisArgs);
 		};
 	}
 
-	stopRecording{arg action, doAnalysis = true, doNormalize = true, doLoadBuffer = true;
+	stopRecording{
+		arg action, doAnalysis = true, doNormalize = true, doLoadBuffer = true, analysisArgs;
 		fork{
 			var cond = Condition.new;
 
@@ -147,6 +149,7 @@ AuditRecordBuffer : AuditBuffer {
 
 			if(doAnalysis, {
 				this.analyze(
+					analysisArgs,
 					action: action
 				);
 			});
