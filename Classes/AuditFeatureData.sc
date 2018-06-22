@@ -11,7 +11,7 @@ AuditFeatureData{
 	}
 
 	*new{arg name, featureArgs, data, specs;
-		^super.newCopyArgs(name, featureArgs, data).init(specs);
+		^super.newCopyArgs(name, featureArgs, data.deepCopy).init(specs);
 	}
 
 	*newFromMirFile{arg name, featureArgs, mirFile, startIndex, numItems,  specs;
@@ -189,7 +189,7 @@ AuditFeatureData{
 		];
 	}
 
-	getSpecs{arg featureArgs;
+	*getSpecs{arg featureArgs;
 		var result;
 		if(featureArgs.notNil,{
 		   	if(specs.includesKey(featureArgs.type), {

@@ -1,4 +1,4 @@
-TestAuditFeatureData : UnitTest {
+TestAuditFeatureData : VTMUnitTest {
 
 	test_loadDataManually{
 		var obj;
@@ -10,12 +10,12 @@ TestAuditFeatureData : UnitTest {
 	test_dataIntegrity{
 		var obj;
 		var testData = [(0.0, 0.1..1.0), (1.0, 0.9..0.0)];
-		obj = AuditFeatureData(\hello);
-		obj.setData(testData);
+		obj = AuditFeatureData(\hello, data: testData);
 		this.assert(obj.data !== testData, "data must be a copy");
 	}
 
 	test_SettingInvalidDataShouldReturnFalseAndNotSetData{
+
 		var wasValid;
 		var obj;
 		var testData = [(0.0, 0.1..1.0), [0.1, 0.2]];
