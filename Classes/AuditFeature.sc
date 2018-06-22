@@ -3,6 +3,7 @@ AuditFeature{
 	var <settings;
 	var <data;
 	var <numItems;
+	var <parameterSpecs;
 
 	classvar <parameterSpecs;
 	classvar itemSpecs;
@@ -27,13 +28,14 @@ AuditFeature{
 	}
 
 	importDataFromMirFile{arg mirFile, startIndex = 0, numItems = 1;
+		var result;
 		if(numItems == 1, {
-			data = mirFile.featuredata.copySeries(
+			result = mirFile.featuredata.copySeries(
 				startIndex, mirFile.numfeatures + startIndex
 			);
-			data = [data];
+			result = [result];
 		}, {
-			data = numItems.collect{arg i;
+			result = numItems.collect{arg i;
 				var index = startIndex + i;
 				mirFile.featuredata.copySeries(
 					index,
@@ -41,11 +43,23 @@ AuditFeature{
 				);
 			};
 		});
+		^this.setData(result);
 	}
 
+	//returns boolean true if data was valid
 	setData{arg arr;
 		//a multichannel array of values between 0.0 and 1.0
-		data = arr;
+		if(this.class.validateData(arr), {
+			data = arr.deepCopy;
+			^true;
+		}, {
+			^false;
+		});
+	}
+
+	*validateData{arg dt;
+		//all data items must have same size
+		^dt.collect(_.size).asSet.size == 1;
 	}
 
 	numSegments {
