@@ -1,5 +1,5 @@
 AuditFeatureData{
-	var <name;
+	var <name; //a name for this specific data
 	var <featureArgs;
 	var <data;
 	var <specs;
@@ -21,7 +21,7 @@ AuditFeatureData{
 	}
 
 	init{arg specs_;
-		specs = specs_ ? this.class.getSpecs(name, featureArgs) ? [];
+		specs = specs_ ? this.class.getSpecs(featureArgs) ? [];
 	}
 
 	*getDataFromMirFile{arg mirFile, startIndex = 0, numItems = 1;
@@ -145,12 +145,12 @@ AuditFeatureData{
 					\mode -> OptionsSpec([\major, \minor, \chromatic])
 				];
 			},
-			\Tartini -> {arg featureSettings;
+			\Tartini -> {arg featureArgs;
 				var result = VTMOrderedIdentityDictionary[
 					\pitch -> \midi.asSpec.units_(\midinote)
 				];
-				if(featureSettings.notNil, {
-					if(featureSettings.notEmpty, {
+				if(featureArgs.notNil, {
+					if(featureArgs.notEmpty, {
 						result.put(\hasFreq, ControlSpec(0.0, 1.0));
 					});
 				});
@@ -189,10 +189,12 @@ AuditFeatureData{
 		];
 	}
 
-	getSpecs{arg name, featureSettings;
+	getSpecs{arg featureArgs;
 		var result;
-		if(specs.includesKey(name), {
-			result = specs[name].value(featureSettings);
+		if(featureArgs.notNil,{
+		   	if(specs.includesKey(featureArgs.type), {
+				result = specs[featureArgs.type].value(featureArgs);
+			});
 		}, {
 			//if the item specs are not defined we assume that it is a single item spec
 			result = VTMOrderedIdentityDictionary[

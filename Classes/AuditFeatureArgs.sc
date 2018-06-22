@@ -1,5 +1,5 @@
 AuditFeatureArgs {
-	var name;
+	var <type;//the type of analysis data e.g. Loudness
 	var args;
 	var <specs;
 
@@ -14,7 +14,7 @@ AuditFeatureArgs {
 		
 	}
 
-	asSCMIRArgs{ ^[name] ++ args.values; }
+	asSCMIRArgs{ ^[type] ++ args.values; }
 
 	=={arg what;
 		if(what.isKindOf(this.class).not, {
@@ -23,8 +23,11 @@ AuditFeatureArgs {
 		^this.hash == what.hash;
 	}
 
+	numArgs{ ^args.size; }
+	keys{ ^specs.keys; }
+
 	hash{
-		^this.instVarHash([\name, \args]);
+		^this.instVarHash([\type, \args]);
 	}
 
 	*initClass{
