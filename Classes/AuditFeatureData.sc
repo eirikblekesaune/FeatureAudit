@@ -11,6 +11,10 @@ AuditFeatureData{
 	}
 
 	*new{arg name, featureArgs, data, specs;
+		if(this.isValidData(data).not, {
+			Error("invalid feature data").throw;
+			^nil;
+		});
 		^super.newCopyArgs(name, featureArgs, data.deepCopy).init(specs);
 	}
 
@@ -58,8 +62,11 @@ AuditFeatureData{
 		});
 	}
 
-	*validateData{arg dt;
-		//all data items must have same size
+	*isValidData{arg dt;
+		//all data items must be array with the same size
+		if(dt.isNil, {^false});
+		if(dt.isArray.not, {^false});
+		if(dt.isEmpty, {^false;});
 		^dt.collect(_.size).asSet.size == 1;
 	}
 

@@ -14,16 +14,24 @@ TestAuditFeatureData : VTMUnitTest {
 		this.assert(obj.data !== testData, "data must be a copy");
 	}
 
-	test_SettingInvalidDataShouldReturnFalseAndNotSetData{
-
-		var wasValid;
+	test_SettingInvalidDataShouldThrowError{
+		var numErrors = 0;
 		var obj;
-		var testData = [(0.0, 0.1..1.0), [0.1, 0.2]];
-		obj = AuditFeatureData(\hello);
-		wasValid = obj.setData(testData);
-		this.assert(wasValid.not and: {obj.data.isNil}, "wasValid: % data: %".format(
-			wasValid, obj.data
-		));
+		var testDataArray = [
+			[(0.0, 0.1..1.0), [0.1, 0.2]],//unequal size
+			[], //empty array
+			nil, // nil
+			12, //non array type object
+		];
+		testDataArray.do{arg testData;
+			try{
+				obj = AuditFeatureData(\hello, data: testData);
+			} {|err|
+				//Shoudl fail
+				numErrors = numErrors + 1;
+			};
+		};
+		this.assertEquals(numErrors, testDataArray.size);
 	}
 
 	test_loadMirFileData{
@@ -32,7 +40,8 @@ TestAuditFeatureData : VTMUnitTest {
 		var obj;
 		filepath = filepath +/+  "data/mirTestData.scmirZ";
 		mirFile = SCMIRAudioFile.newFromZ(filepath);
-		obj = AuditFeatureData(\Loudness, mirFile: mirFile);
+		obj = AuditFeatureData.newFromMirFile(\myLoudness,
+			mirFile: mirFile);
 
 		this.assertEquals(
 			obj.data.flat.size,
