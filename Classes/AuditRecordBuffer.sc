@@ -25,15 +25,21 @@ AuditRecordBuffer : AuditBuffer {
 		recDuration = 30,
 		action,
 		recFolder,
-		name = "rAuditRec",
+		name = "AuditRec",
 		headerFormat = "aiff",
-		sampleFormat = "int32"
+		sampleFormat = "int32",
+		target,
+		addAction = \addToTail
 		|
 		recRoutine = fork{
 			var cond = Condition.new;
 			var stamp = Date.getDate.stamp;
 			var recSoundfile;
 			var thisOne;
+			//add end slash if not there
+			if(recFolder.asString.last != $/, {
+				recFolder = recFolder ++ "/";
+			});
 
 			recFilepath = "%%%.%".format(
 				recFolder, name, stamp, headerFormat
@@ -58,11 +64,15 @@ AuditRecordBuffer : AuditBuffer {
 			cond.wait;
 			cond.test = false;
 
-			recSynth = NodeProxy.audio(server, busnums.size);
-			recSynth.source = {
-				var sig = SoundIn.ar(busnums);
+			recSynth = {
+				var sig = In.ar(busnums);
 				DiskOut.ar(recBuffer.bufnum, sig);
-			};
+				Silent.ar(0);
+			}.play(
+				target: target.asTarget,
+				addAction: addAction
+			);
+
 			"Started recording '%'".format(tempRecFilepath).postln;
 			thisOne = thisThread;
 			recIndicator = fork{
@@ -78,11 +88,8 @@ AuditRecordBuffer : AuditBuffer {
 					).postln;
 				}
 			};
-			recSynth.addDependant({arg whoChanged, whatChanged;
-				if(whatChanged == \free, {
-					// "IT WAS FREED".postln;
-					recIndicator.stop;
-				});
+			recSynth.onFree({
+				recIndicator.stop;
 			});
 
 			recDuration.wait;
