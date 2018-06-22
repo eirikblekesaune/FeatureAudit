@@ -1,6 +1,6 @@
 AuditFeatureData{
 	var <name; //a name for this specific data
-	var <featureArgs;
+	var featureArgs;
 	var <data;
 	var <specs;
 
@@ -15,7 +15,7 @@ AuditFeatureData{
 			Error("invalid feature data").throw;
 			^nil;
 		});
-		^super.newCopyArgs(name, featureArgs, data.deepCopy).init(specs);
+		^super.newCopyArgs(name, featureArgs.deepCopy, data.deepCopy).init(specs);
 	}
 
 	*newFromMirFile{arg name, featureArgs, mirFile, startIndex, numItems,  specs;
@@ -27,6 +27,9 @@ AuditFeatureData{
 	init{arg specs_;
 		specs = specs_ ? this.class.getSpecs(featureArgs) ? [];
 	}
+
+	type{ ^featureArgs.type; }
+	args{ ^featureArgs.args; }
 
 	*getDataFromMirFile{arg mirFile, startIndex = 0, numItems = 1;
 		var result;

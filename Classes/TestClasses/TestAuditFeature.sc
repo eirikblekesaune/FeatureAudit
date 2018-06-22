@@ -14,6 +14,14 @@ TestAuditFeatureData : VTMUnitTest {
 		this.assert(obj.data !== testData, "data must be a copy");
 	}
 
+	test_featureArgsIntegrity{
+		//When feature args has been used in the data
+		//it can not be reached or changed any longer.
+		var obj;
+		var featureArgs;
+		featureArgs = AuditFeatureArgs(\Loudness, []);
+	}
+
 	test_SettingInvalidDataShouldThrowError{
 		var numErrors = 0;
 		var obj;
