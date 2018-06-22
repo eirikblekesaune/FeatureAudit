@@ -5,16 +5,32 @@ AuditFeatureArgs {
 
 	classvar <specs;
 
-	*new{arg args, specs;
-		^super.newCopyArgs(args).init(specs);
+	*new{arg type, args, specs;
+		if(type.isNil, {
+			Error("must have feature args type").throw;
+			^nil;
+		});
+		if(this.specs.includesKey(type).not, {
+			Error("unknown feature args type: ''".format(type)).throw;
+			^nil;
+		});
+		^super.newCopyArgs(type, args).init(specs);
 	}
 
 	init{arg specs_;
-
-		
+		specs = specs_ ?? {
+			this.class.specs[type];
+		};
 	}
 
-	asSCMIRArgs{ ^[type] ++ args.values; }
+	asSCMIRArgs{
+		var result = [type];
+		if(args.notNil, {
+			result = result.add( args );
+		});
+		^result;
+	}
+	asArray{ ^this.asSCMIRArgs; }
 
 	=={arg what;
 		if(what.isKindOf(this.class).not, {
@@ -110,7 +126,14 @@ AuditFeatureArgs {
 			\BeatStatistics -> VTMOrderedIdentityDictionary[
 				\leak -> ControlSpec(0.01, 0.999, default: 0.95),
 				\numpreviousbeats -> ControlSpec(0, 32, default: 4)
-			]
+			],
+			\CustomFeature -> VTMOrderedIdentityDictionary[
+				//function that checks if incoming value is a function that defines
+				//a closed function.
+				\function -> {|val| val.isFunction and: {val.isClosed;};},
+				\numItems -> ControlSpec(0, 100, default: 1)
+				
+			];
 		]
 	}
 }

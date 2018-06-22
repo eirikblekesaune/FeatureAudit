@@ -35,17 +35,17 @@ TestAuditFeatureData : VTMUnitTest {
 	}
 
 	test_loadMirFileData{
-		var filepath = PathName(this.class.filenameSymbol.asString).pathOnly;
+		var filepath;
 		var mirFile;
 		var obj;
+		filepath = PathName(this.class.filenameSymbol.asString).pathOnly;
 		filepath = filepath +/+  "data/mirTestData.scmirZ";
 		mirFile = SCMIRAudioFile.newFromZ(filepath);
 		obj = AuditFeatureData.newFromMirFile(\myLoudness,
-			mirFile: mirFile);
-
-		this.assertEquals(
-			obj.data.flat.size,
-			mirFile.featuredata.size
+			featureArgs: AuditFeatureArgs( \Loudness ),
+			mirFile: mirFile,
+			startIndex: 0,
+			numItems: mirFile.numfeatures
 		);
 	}
 }
