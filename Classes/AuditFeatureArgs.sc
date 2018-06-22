@@ -26,7 +26,7 @@ AuditFeatureArgs {
 	asSCMIRArgs{
 		var result = [type];
 		if(args.notNil, {
-			result = result.add( args );
+			result = result ++ args;
 		});
 		^result;
 	}
@@ -44,6 +44,11 @@ AuditFeatureArgs {
 
 	hash{
 		^this.instVarHash([\type, \args]);
+	}
+
+	printOn{arg stream;
+		stream << this.class.name;
+		stream << this.asArray;
 	}
 
 	*initClass{
@@ -127,13 +132,12 @@ AuditFeatureArgs {
 				\leak -> ControlSpec(0.01, 0.999, default: 0.95),
 				\numpreviousbeats -> ControlSpec(0, 32, default: 4)
 			],
-			\CustomFeature -> VTMOrderedIdentityDictionary[
+			\CustomFeature -> []//VTMOrderedIdentityDictionary[
 				//function that checks if incoming value is a function that defines
 				//a closed function.
-				\function -> {|val| val.isFunction and: {val.isClosed;};},
-				\numItems -> ControlSpec(0, 100, default: 1)
-				
-			];
+				//\function -> {|val| val.isFunction and: {val.isClosed;};},
+				//\numItems -> ControlSpec(0, 100, default: 1)
+			//];
 		]
 	}
 }
