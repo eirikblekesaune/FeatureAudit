@@ -1,17 +1,16 @@
-TestAuditFeature : UnitTest {
+TestAuditFeatureData : UnitTest {
 
 	test_loadDataManually{
 		var obj;
 		var testData = [(0.0, 0.1..1.0), (1.0, 0.9..0.0)];
-		obj = AuditFeature(\myFeature);
-		obj.setData(testData);
+		obj = AuditFeatureData(\myFeature, data: testData);
 		this.assertEquals(obj.data, testData);
 	}
 
 	test_dataIntegrity{
 		var obj;
 		var testData = [(0.0, 0.1..1.0), (1.0, 0.9..0.0)];
-		obj = AuditFeature(\hello);
+		obj = AuditFeatureData(\hello);
 		obj.setData(testData);
 		this.assert(obj.data !== testData, "data must be a copy");
 	}
@@ -20,7 +19,7 @@ TestAuditFeature : UnitTest {
 		var wasValid;
 		var obj;
 		var testData = [(0.0, 0.1..1.0), [0.1, 0.2]];
-		obj = AuditFeature(\hello);
+		obj = AuditFeatureData(\hello);
 		wasValid = obj.setData(testData);
 		this.assert(wasValid.not and: {obj.data.isNil}, "wasValid: % data: %".format(
 			wasValid, obj.data
@@ -33,7 +32,7 @@ TestAuditFeature : UnitTest {
 		var obj;
 		filepath = filepath +/+  "data/mirTestData.scmirZ";
 		mirFile = SCMIRAudioFile.newFromZ(filepath);
-		obj = AuditFeature(\Loudness, mirFile: mirFile);
+		obj = AuditFeatureData(\Loudness, mirFile: mirFile);
 
 		this.assertEquals(
 			obj.data.flat.size,

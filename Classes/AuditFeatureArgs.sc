@@ -1,13 +1,16 @@
 AuditFeatureArgs {
 	var name;
 	var args;
+	var <specs;
+
 	classvar <specs;
 
-	*new{arg name, args;
-		^super.newCopyArgs(name).init(args);
+	*new{arg args, specs;
+		^super.newCopyArgs(args).init(specs);
 	}
 
-	init{arg args_;
+	init{arg specs_;
+
 		
 	}
 

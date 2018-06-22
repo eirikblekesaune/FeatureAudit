@@ -3,7 +3,7 @@ AuditBuffer {
 	var <buffer; //TEMP getter
 	var <mirFile;//TEMP getter
 	var <mirFilepath;
-	var <features;//TEMP getter [AuditFeature]
+	var <features;//TEMP getter [AuditFeatureData]
 	var <soundFile;//TEMP getter
 	var samples;//sclang sample values from buffer
 	var range; //the main range for frames to be selected from
@@ -112,7 +112,7 @@ AuditBuffer {
 			#featureName, startIndex, numItems = item;
 			result.put(
 				featureName,
-				AuditFeature(
+				AuditFeatureData(
 					featureName,
 					featureArgsList[i][1..],
 					mirFile,

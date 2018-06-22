@@ -1,4 +1,4 @@
-AuditFeature{
+AuditFeatureData{
 	var <name;
 	var <featureArgs;
 	var <data;
