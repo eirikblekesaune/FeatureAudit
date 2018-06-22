@@ -44,11 +44,35 @@ TestAuditFeatureArgs : VTMUnitTest {
 		this.assertEquals(obj.asArray, [\Loudness] ++ args);
 	}
 
+	test_SetGetArgsByKey{
+		//test all that have args to the feature
+		AuditFeatureArgs.specs.select({arg item;
+			item.notEmpty;
+		}).keysValuesDo({arg type, spec;
+			var obj;
+			var args, newArgs;
+			obj = this.class.makeRandom(type: type);
+			args = obj.args;
+			obj.specs.keysValuesDo({arg specKey, spec;
+				var newVal = spec.random;
+				newArgs = newArgs.add(newVal);
+				obj.set(specKey, newVal);
+				this.assertEquals(
+					obj.get(specKey), newVal,
+					"Should set feature args for '%' key: '%'".format(
+						type, specKey
+					)
+				);
+			});
+		});
+	}
 
-	*makeRandom{
+	*makeRandom{arg type;
 		var result;
-		var type, args;
-		type = AuditFeatureArgs.specs.keys.choose;
+		var args;
+		if(type.isNil, {
+			type = AuditFeatureArgs.specs.keys.choose;
+		});
 		AuditFeatureArgs.specs[type].do{arg item;
 			args = args.add(item.random);
 		};

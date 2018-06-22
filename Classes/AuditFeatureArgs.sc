@@ -1,6 +1,6 @@
 AuditFeatureArgs {
 	var <type;//the type of analysis data e.g. Loudness
-	var args;
+	var <args;
 	var <specs;
 
 	classvar <specs;
@@ -21,6 +21,18 @@ AuditFeatureArgs {
 		specs = specs_ ?? {
 			this.class.specs[type];
 		};
+	}
+
+	set{arg key, val;
+		var index = this.class.specs[type].keys.indexOf(key);
+		args.put(index, val);
+	}
+
+	get{arg key;
+		var result;
+		var index = this.class.specs[type].keys.indexOf(key);
+		result = args[index];
+		^result;
 	}
 
 	asSCMIRArgs{
