@@ -3,22 +3,23 @@ AuditFeature{
 	var <featureArgs;
 	var <data;
 	var <numItems;
+	var <specs;
 
-	classvar itemSpecs;
+	classvar specs;
 
 	*initClass{
 		this.initSpecs();
 	}
 
-	*new{arg name, featureArgs, mirFile, startIndex = 0, numItems = 1, itemSpecs;
-		^super.new.init(name, featureArgs, mirFile, startIndex, numItems, itemSpecs);
+	*new{arg name, featureArgs, mirFile, startIndex = 0, numItems = 1, specs;
+		^super.new.init(name, featureArgs, mirFile, startIndex, numItems, specs);
    	}
 
-	init{arg name_, featureArgs_, mirFile, startIndex, numItems_, itemSpecs_;
+	init{arg name_, featureArgs_, mirFile, startIndex, numItems_, specs_;
 		name = name_;
 		featureArgs = featureArgs_;
 		numItems = numItems_;
-		itemSpecs = itemSpecs_ ? this.class.getItemSpecs(name, featureArgs) ? [];
+		specs = specs_ ? this.class.getSpecs(name, featureArgs) ? [];
 		if(mirFile.notNil, {
 			this.importDataFromMirFile(mirFile, startIndex, numItems_);
 		});
@@ -84,7 +85,7 @@ AuditFeature{
 	*initSpecs{
 		//the return values from the feature analysis are based on SCMIR documetnation and SCMIRAudioFile
 		//implementation
-		itemSpecs = VTMOrderedIdentityDictionary[
+		specs = VTMOrderedIdentityDictionary[
 			\MFCC -> {arg featureArgs;
 				var result;
 				var numItems;
@@ -185,10 +186,10 @@ AuditFeature{
 		];
 	}
 
-	*getItemSpecs{arg name, featureSettings;
+	getSpecs{arg name, featureSettings;
 		var result;
-		if(itemSpecs.includesKey(name), {
-			result = itemSpecs[name].value(featureSettings);
+		if(specs.includesKey(name), {
+			result = specs[name].value(featureSettings);
 		}, {
 			//if the item specs are not defined we assume that it is a single item spec
 			result = VTMOrderedIdentityDictionary[
