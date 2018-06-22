@@ -6,6 +6,10 @@ OptionsSpec {
 		^super.newCopyArgs(options, default);
 	}
 
+	minval{ ^options.first; }
+	maxval{ ^options.last; }
+	random{ ^options.choose; }
+
 	map{arg val;
 		var result;
 		if(val.isNumber, {
