@@ -63,6 +63,18 @@ AuditFeatureArgs {
 		stream << this.asArray;
 	}
 
+	makeView{arg parent, bounds, featureArgs;
+		var viewUpdater;
+		var specControls;
+		var specControlsView;
+		specControls = this.specs.collect({arg spec, specKey;
+			"spec: % key: %".format(spec, specKey).postln;
+		});
+//		specControlsView = View().layout_(VLayout(
+//		);
+//		^View(parent, bounds)
+	}
+
 	*initClass{
 		Class.initClassTree(VTMOrderedIdentityDictionary);
 		specs = VTMOrderedIdentityDictionary[
