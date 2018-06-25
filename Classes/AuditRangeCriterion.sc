@@ -5,9 +5,8 @@ AuditRangeCriterion : AuditCriterion {
 		^super.new(name, specs).min_(min).max_(max);
 	}
 
-	findQualifiedSegmentIndexes{arg auditBuf;
+	findQualifiedSegmentIndexes{arg feature;
 		var result;
-		var feature = auditBuf.features[name];
 		if(inverse.not, {
 			feature.segments.do({arg val, i;
 				if((val <= max) && (val >= min), {

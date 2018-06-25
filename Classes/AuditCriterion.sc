@@ -5,37 +5,20 @@ AuditCriterion{
 	var <inverse = false;
 	var >testFunction;
 
-
-	*loudness{arg min, max;
-		^AuditRangeCriterion(
-			\Loudness,
-			VTMOrderedIdentityDictionary[
-				\min -> \db.asSpec,
-				\max -> \db.asSpec.default_(0.0)
-			],
-			min, max
-		);
-	}
-
-	*pitch{arg min, max;
-		^AuditRangeCriterion(
-			\Tartini,
-			VTMOrderedIdentityDictionary[
-				\min -> \freq.asSpec.default_(20),
-				\max -> \freq.asSpec.default_(20000)
-			],
-			min, max
-		);
-	}
-
 	*new{arg name, specs;
 		^super.newCopyArgs( name, specs );
 	}
 
-	findQualifiedSegmentIndexes{arg auditBuf;
+	findQualifiedSegmentIndexes{arg feature;
+		var result;
 		if(testFunction.notNil, {
-			testFunction.value(auditBuf);
+			feature.segments.do({arg val, i;
+				if(testFunction.value(val, i), {
+					result = result.add(i);
+				});
+			});
 		});
+		^result;
 	}
 
 	inverse_{arg val; inverse = val; this.changed(\criterion, \range); }
