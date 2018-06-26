@@ -1,7 +1,7 @@
 AuditRangeCriterion : AuditCriterion {
-	var <min = 0.0, <max = 1.0;
+	var <min, <max;
 
-	*new{arg name, specs, min, max;
+	*new{arg name, specs, min = 0.0, max = 1.0;
 		^super.new(name, specs).min_(min).max_(max);
 	}
 
