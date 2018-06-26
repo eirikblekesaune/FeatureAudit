@@ -1,5 +1,5 @@
 + Array {
-	segmentConsecutiveFrames {
+	clumpConsecutive {
 		var result = [];
 		var temp;
 		this.doAdjacentPairs({arg aa, bb, i;
