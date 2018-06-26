@@ -21,6 +21,16 @@ AuditCriterion{
 		^result;
 	}
 
+	findQualifiedSections{arg feature;
+		var result, segIndexes;
+		segIndexes = this.findQualifiedSegmentIndexes(feature);
+		segIndexes = segIndexes.clumpConsecutive;
+		result = segIndexes.collect({arg indexes, i; 
+			AuditSection(indexes.first, indexes.last);
+		});
+		^result;
+	}
+
 	inverse_{arg val; inverse = val; this.changed(\criterion, \range); }
 
 	or{arg aCriterion;
@@ -41,19 +51,34 @@ AuditBinaryCriterion {
 		^super.newCopyArgs(a, b, operator);
 	}
 
-	findQualifiedSegmentIndexes{arg auditBuf;
+	findQualifiedSegmentIndexes{arg feature;
 		var result;
 		switch(operator,
 			\or, {
-				result = a.findQualifiedSegmentIndexes(auditBuf).asSet union:
-				b.findQualifiedSegmentIndexes(auditBuf).asSet
+				result = a.findQualifiedSegmentIndexes(feature).asSet union:
+				b.findQualifiedSegmentIndexes(feature).asSet
 			},
 			\and, {
-				result = a.findQualifiedSegmentIndexes(auditBuf).asSet sect:
-				b.findQualifiedSegmentIndexes(auditBuf).asSet
+				result = a.findQualifiedSegmentIndexes(feature).asSet sect:
+				b.findQualifiedSegmentIndexes(feature).asSet
 			}
 		);
-		^result;
+		^result.asArray.sort;
+	}
+
+	findQualifiedSections{arg feature;
+		var result;
+		switch(operator,
+			\or, {
+				result = a.findQualifiedSections(feature).asSet union:
+				b.findQualifiedSections(feature).asSet
+			},
+			\and, {
+				result = a.findQualifiedSections(feature).asSet sect:
+				b.findQualifiedSections(feature).asSet
+			}
+		);
+		^result.asArray.sort;
 	}
 
 	or{arg aCriterion;
