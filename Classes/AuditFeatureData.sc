@@ -3,6 +3,7 @@ AuditFeatureData{
 	var featureArgs;
 	var <data;
 	var <specs;
+	var <>auditBuf;
 
 	classvar specs;
 

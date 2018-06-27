@@ -24,29 +24,24 @@ AuditRecordBuffer : AuditBuffer {
 		busnums,
 		recDuration = 30,
 		action,
-		recFolder,
-		name = "AuditRec",
 		headerFormat = "aiff",
 		sampleFormat = "int32",
 		target,
+		filepath,
 		addAction = \addToTail,
 		analysisArgs
 		|
 		recRoutine = fork{
 			var cond = Condition.new;
-			var stamp = Date.getDate.stamp;
+			var filename;
+			var folder;
 			var recSoundfile;
 			var thisOne;
-			//add end slash if not there
-			if(recFolder.asString.last != $/, {
-				recFolder = recFolder ++ "/";
-			});
+			folder = PathName(filepath).pathOnly;
+			filename = PathName(filepath).nameOnly;
 
-			recFilepath = "%%%.%".format(
-				recFolder, name, stamp, headerFormat
-			);
-			tempRecFilepath	= "%_temp_%%.%".format(
-				recFolder, name, stamp, headerFormat
+			tempRecFilepath	= "%/_temp_%.%".format(
+				folder, filename, headerFormat
 			);
 			recBuffer = Buffer.alloc(server, server.sampleRate.nextPowerOfTwo, busnums.size,
 				{ cond.test = true; cond.signal; }
@@ -94,13 +89,12 @@ AuditRecordBuffer : AuditBuffer {
 			});
 
 			recDuration.wait;
-			this.stopRecording(action, analysisArgs: analysisArgs);
+			this.stopRecording(action);
 		};
 	}
 
-	stopRecording{
-		arg action, doAnalysis = true, doNormalize = true, doLoadBuffer = true, analysisArgs;
-		fork{
+	stopRecording{ arg action;
+		forkIfNeeded{
 			var cond = Condition.new;
 
 			if(recIndicator.notNil and: {recIndicator.isPlaying}, {
@@ -122,38 +116,28 @@ AuditRecordBuffer : AuditBuffer {
 			});
 			cond.wait;
 			cond.test = false;
-			if(doNormalize, {
-				var tempSoundFile;
-				tempSoundFile = SoundFile.openRead(tempRecFilepath);
-				while({ tempSoundFile.isOpen.not; }, {
-					//"opening file".postln;
-				});
-				// "Normalizing recording '%'".format(recFilepath).postln;
-				tempSoundFile.normalize( recFilepath );
-				tempSoundFile.close;
-				while({ tempSoundFile.isOpen }, {
-					// "Closing file".postln;
-				});
-				File.delete(tempRecFilepath);
-
-
-			});
-			soundFile = SoundFile.openRead(recFilepath);
 			while({ soundFile.isOpen.not; }, {
 				//"opening file".postln;
 			});
 
-			if(doLoadBuffer, {
-				buffer = soundFile.asBuffer;
-			});
-
-			if(doAnalysis, {
-				this.analyze(
-					analysisArgs,
-					action: action
-				);
-			});
+			buffer = soundFile.asBuffer;
 		};
+	}
+
+	normalize{
+		var tempSoundFile;
+		tempSoundFile = SoundFile.openRead(tempRecFilepath);
+		while({ tempSoundFile.isOpen.not; }, {
+			//"opening file".postln;
+		});
+		// "Normalizing recording '%'".format(recFilepath).postln;
+		tempSoundFile.normalize( recFilepath );
+		tempSoundFile.close;
+		while({ tempSoundFile.isOpen }, {
+			// "Closing file".postln;
+		});
+		File.delete(tempRecFilepath);
+		soundFile = SoundFile.openRead(recFilepath);
 	}
 
 	abortRecording{
