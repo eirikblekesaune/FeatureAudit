@@ -26,7 +26,11 @@ AuditFeatureData{
 	}
 
 	init{arg specs_;
-		featureArgs = featureArgs ? AuditFeatureArgs('CustomFeature');
+		if(featureArgs.notNil, {
+			featureArgs = AuditFeatureArgs(featureArgs[0], featureArgs[1..]);
+		}, {
+			featureArgs = AuditFeatureArgs('CustomFeature');
+		});
 		specs = specs_ ? this.class.getSpecs(featureArgs);
 	}
 
@@ -161,10 +165,8 @@ AuditFeatureData{
 				var result = VTMOrderedIdentityDictionary[
 					\pitch -> \midi.asSpec.units_(\midinote)
 				];
-				if(featureArgs.notNil, {
-					if(featureArgs.notEmpty, {
-						result.put(\hasFreq, ControlSpec(0.0, 1.0));
-					});
+				if(featureArgs.args.notEmpty, {
+					result.put(\hasFreq, ControlSpec(0.0, 1.0));
 				});
 				result;
 			},
