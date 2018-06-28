@@ -26,7 +26,8 @@ AuditFeatureData{
 	}
 
 	init{arg specs_;
-		specs = specs_ ? this.class.getSpecs(featureArgs) ? [];
+		featureArgs = featureArgs ? AuditFeatureArgs('CustomFeature');
+		specs = specs_ ? this.class.getSpecs(featureArgs);
 	}
 
 	type{ ^featureArgs.type; }

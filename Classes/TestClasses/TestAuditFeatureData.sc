@@ -22,6 +22,15 @@ TestAuditFeatureData : VTMUnitTest {
 		featureArgs = AuditFeatureArgs(\Loudness, []);
 	}
 
+	test_NoFeatureArgsShouldGiveArgsTypeNone{
+		var obj;
+		var testData = [(0.0, 0.1..1.0)];
+		obj = AuditFeatureData('myFeature', data: testData);
+		this.assertEquals(
+			obj.type, 'CustomFeature'
+		)
+	}
+
 	test_SettingInvalidDataShouldThrowError{
 		var numErrors = 0;
 		var obj;
