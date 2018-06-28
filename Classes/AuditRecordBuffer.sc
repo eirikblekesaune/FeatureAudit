@@ -6,6 +6,8 @@ AuditRecordBuffer : AuditBuffer {
 	var numChannels;
 	var recIndicator;
 	var recRoutine;
+	var normalizeAfterRecording = true;
+	var analyzeAfterRecording = true;
 
 	*new{arg server;
 		^super.new(server).initAuditRecordBuffer;
@@ -39,8 +41,9 @@ AuditRecordBuffer : AuditBuffer {
 			var thisOne;
 			folder = PathName(filepath).pathOnly;
 			filename = PathName(filepath).fileNameWithoutExtension;
+			recFilepath = filepath;
 
-			tempRecFilepath	= "%/_temp_%.%".format(
+			tempRecFilepath	= "%_temp_%.%".format(
 				folder, filename, headerFormat
 			);
 			recBuffer = Buffer.alloc(server, server.sampleRate.nextPowerOfTwo, busnums.size,
@@ -93,7 +96,7 @@ AuditRecordBuffer : AuditBuffer {
 		};
 	}
 
-	stopRecording{ arg action;
+	stopRecording{ arg doWhenReady;
 		forkIfNeeded{
 			var cond = Condition.new;
 
@@ -116,11 +119,26 @@ AuditRecordBuffer : AuditBuffer {
 			});
 			cond.wait;
 			cond.test = false;
-			while({ soundFile.isOpen.not; }, {
-				//"opening file".postln;
+
+			if(normalizeAfterRecording, {
+				this.normalize;
+			});
+			soundFile = SoundFile.openRead(recFilepath);
+			while({soundFile.isOpen.not}, {
+				//waiting for sound file to open
 			});
 
 			buffer = soundFile.asBuffer;
+			server.sync;
+
+			if(analyzeAfterRecording, {
+				cond.test = false;
+				this.analyze(action: {
+					cond.test = true; cond.signal;
+				});
+			});
+			cond.wait;
+			doWhenReady.value(this);
 		};
 	}
 
@@ -137,11 +155,10 @@ AuditRecordBuffer : AuditBuffer {
 			// "Closing file".postln;
 		});
 		File.delete(tempRecFilepath);
-		soundFile = SoundFile.openRead(recFilepath);
 	}
 
 	abortRecording{
-		fork{
+		forkIfNeeded{
 			recRoutine.stop;
 			recSynth.free;
 			if(recBuffer.notNil, {
