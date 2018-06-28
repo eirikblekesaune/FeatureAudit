@@ -109,17 +109,24 @@ AuditBuffer {
 		result = IdentityDictionary.new;
 		idxInfo.do{arg item, i;
 			var featureName, startIndex, numItems;
+			var featureObj;
 			#featureName, startIndex, numItems = item;
-			result.put(
-				featureName,
-				AuditFeatureData(
+
+			try{
+				featureObj = AuditFeatureData(
 					featureName,
 					featureArgsList[i][1..],
 					mirFile,
 					startIndex,
 					numItems
 				)
-			);
+			} {|err|
+				"Failed to make AuditFeature obj for '%'".format(
+					featureName
+				).warn;
+			};
+
+			result.put( featureName, featureObj);
 		};
 		^result;
 	}
