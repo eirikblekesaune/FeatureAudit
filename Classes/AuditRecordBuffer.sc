@@ -38,7 +38,7 @@ AuditRecordBuffer : AuditBuffer {
 			var recSoundfile;
 			var thisOne;
 			folder = PathName(filepath).pathOnly;
-			filename = PathName(filepath).nameOnly;
+			filename = PathName(filepath).fileNameWithoutExtension;
 
 			tempRecFilepath	= "%/_temp_%.%".format(
 				folder, filename, headerFormat
