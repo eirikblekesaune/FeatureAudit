@@ -82,8 +82,8 @@ AuditRecordBuffer : AuditBuffer {
 					});
 					1.0.wait;
 					i = i + 1;
-					"\tRecording dur: % of % from busnums: % [%]".format(
-						i, recDuration, busnums, recFilepath
+					"\tRecording dur: % of % from busnums: %".format(
+						i, recDuration, busnums 
 					).postln;
 				}
 			};
