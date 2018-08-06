@@ -82,12 +82,12 @@ AuditBuffer {
 			];
 			mirFile = SCMIRAudioFile(pathName.fullPath, analysisArgs);
 
-			"Starting analysis of '%'".format(
-				pathName.fullPath
-			).postln;
+			//"Starting analysis of '%'".format(
+			//	pathName.fullPath
+			//).postln;
 			mirFile.extractFeatures();
 			mirFile.extractOnsets();
-			"\tAnalysis DONE".postln;
+			//"\tAnalysis DONE".postln;
 
 			mirFilepath = "%%.scmirZ".format(
 				pathName.pathOnly,
@@ -95,7 +95,7 @@ AuditBuffer {
 			);
 			mirFile.save(mirFilepath);
 			features = this.class.prMakeFeatures(mirFile, analysisArgs);
-			"features done: %".format(features).postln;
+			//"features done: %".format(features).postln;
 			action.value(mirFile);
 		}
 	}
@@ -103,7 +103,7 @@ AuditBuffer {
 	*prMakeFeatures{arg mirFile, featureArgsList;
 		var result;
 		var idxInfo;
-		"Making features".postln;
+		//"Making features".postln;
 		idxInfo = mirFile.featureinfo.collect(_.first);
 		idxInfo = idxInfo +++ mirFile.resolveFeatureNumbers;
 		result = IdentityDictionary.new;
