@@ -35,14 +35,14 @@ AuditBuffer {
 		var result;
 		var tempIndexes;
 		tempIndexes = criterions.collect({arg criterion, i;
-			criterion.findQualifiedSegmentIndexes(this).asSet;
+      criterion.findQualifiedSegmentIndexes(features[criterion.name]).asSet;
 		});
 		result = tempIndexes.first;
 		if(tempIndexes.size > 1, {
 			tempIndexes[1..].do({arg item;
 				result = result.sect(item);
 			});
-		});
+    });
 		^result.asArray.sort;
 	}
 
@@ -55,7 +55,7 @@ AuditBuffer {
 	findQualifiedSegments{arg criterions;
 		var result;
 		result = this.findQualifiedSegmentIndexes(criterions);
-		result = result.segmentConsecutiveFrames;
+		result = result.clumpConsecutive;
 		result = result.collect({arg segment;
 			AuditBufferSegment(segment.first, segment.size, buffer);
 		});

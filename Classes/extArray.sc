@@ -21,7 +21,7 @@
 
 	consecutiveToRanges {
 		var result;
-		this.segmentConsecutiveFrames.collect({arg segment;
+		this.clumpConsecutive.collect({arg segment;
 			result = result.add(
 				Range(
 					segment.first,
