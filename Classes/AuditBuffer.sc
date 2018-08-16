@@ -31,6 +31,10 @@ AuditBuffer {
 		^buffer.duration;
 	}
 
+  bufnum {
+    ^buffer.bufnum;
+  }
+
 	findQualifiedSegmentIndexes{arg criterions;
 		var result;
 		var tempIndexes;
