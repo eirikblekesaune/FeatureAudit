@@ -1,8 +1,8 @@
 AuditFeatureData{
 	var <featureName;
-	var <featureArgs;
 	var <data;
 	var <specs;
+	var <featureArgsDict;
 	var <>auditBuf;
 
 	classvar specs;
@@ -26,11 +26,17 @@ AuditFeatureData{
 	}
 
 	init{arg featureName_, featureArgs_, data_, specs_;
+		var featureArgsSpecs;
 		featureName = featureName_;
 		//the data inits to a dict
 		data = VTMOrderedIdentityDictionary.new;
-		featureArgs = featureArgs_;
-		specs = specs_ ? this.class.getSpecs(featureName, featureArgs);
+
+		featureArgsSpecs = AuditAnalysisArgs.getSpecs(featureName);
+		featureArgsDict = VTMOrderedIdentityDictionary.new;
+		featureArgsSpecs.keysValuesDo({arg featureArgName, featureArgSpec, i;
+			featureArgsDict.put(featureArgName, featureArgs_[i]);
+		});
+		specs = specs_ ? this.class.getSpecs(featureName, featureArgsDict);
 
 		if(specs.notNil, {
 			//We found specs for this feature name.
@@ -45,9 +51,11 @@ AuditFeatureData{
 				specs = VTMOrderedIdentityDictionary[\val -> ControlSpec.new];
 				data.put( \val, data_.at(0) );
 			}, {
-				Error("Something wrong with the feature data and its specs: '%'".format(
-					featureName
-				)).throw;
+				var tempData, tempSize;
+				//make each segment multi item data
+				tempSize = data_.size;
+				tempData = data_.flop.flat.clump(tempSize);
+				data.put(\val, tempData);
 			})
 		});
 	}
@@ -76,6 +84,8 @@ AuditFeatureData{
 	}
 
 	itemNames{ ^data.keys; }
+
+	featureArgs { ^featureArgsDict.values; }
 
 	//returns boolean true if data was valid
 	setData{arg arr;
@@ -127,23 +137,23 @@ AuditFeatureData{
 	}
 
 	hash{
-		^this.instVarHash([\data, \featureArgs]);
+		^this.instVarHash([\data, \featureArgsDict]);
 	}
 
 	*initSpecs{
 		//the return values from the feature analysis are based on SCMIR documentation and SCMIRAudioFile
 		//implementation
 		specs = VTMOrderedIdentityDictionary[
-			\MFCC -> {arg featureArgs;
+			\MFCC -> {arg featureArgsDict;
 				var result;
 				var numItems;
-				if(featureArgs.isNil, {
-					numItems = featureArgs.at(\numcoeff);
+				if(featureArgsDict.isNil, {
+					numItems = featureArgsDict.at(\numcoeff);
 				}, {
-					if(featureArgs.isEmpty, {
+					if(featureArgsDict.isEmpty, {
 						numItems = AuditFeatureArgs.specs[\MFCC][\numcoeff].default;
 					}, {
-						numItems = featureArgs.at(\numcoeff);
+						numItems = featureArgsDict.at(\numcoeff);
 					});
 				});
 				result = VTMOrderedIdentityDictionary.new;
@@ -155,15 +165,15 @@ AuditFeatureData{
 				});
 				result;
 			},
-			\Chromagram -> {arg featureArgs;
+			\Chromagram -> {arg featureArgsDict;
 				var result, numItems;
-				if(featureArgs.isNil, {
-					numItems = featureArgs.at(\n);
+				if(featureArgsDict.isNil, {
+					numItems = featureArgsDict.at(\n);
 				}, {
-					if(featureArgs.isEmpty, {
+					if(featureArgsDict.isEmpty, {
 						numItems = AuditFeatureArgs.specs[\Chromagram][\n].default;
 					}, {
-						numItems = featureArgs.at(\n);
+						numItems = featureArgsDict.at(\n)
 					});
 				});
 				result = VTMOrderedIdentityDictionary.new;
@@ -190,11 +200,11 @@ AuditFeatureData{
 					\mode -> OptionsSpec([\major, \minor, \chromatic])
 				];
 			},
-			\Tartini -> {arg featureArgs;
+			\Tartini -> {arg featureArgsDict;
 				var result = VTMOrderedIdentityDictionary[
 					\pitch -> \midi.asSpec.units_(\midinote)
 				];
-				if(featureArgs.notEmpty, {
+				if(featureArgsDict.notEmpty, {
 					result.put(\hasFreq, ControlSpec(0.0, 1.0));
 				});
 				result;
@@ -232,10 +242,10 @@ AuditFeatureData{
 		];
 	}
 
-	*getSpecs{arg featureName, featureArgs;
+	*getSpecs{arg featureName, featureArgsDict;
 		var result;
 		if(specs.includesKey(featureName), {
-			result = specs[featureName].value(featureArgs);
+			result = specs[featureName].value(featureArgsDict);
 		});
 		^result;
 	}

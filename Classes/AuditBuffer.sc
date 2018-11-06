@@ -85,7 +85,9 @@ AuditBuffer {
 				[\FFTCrest],
 				[\FFTSpread],
 				[\Tartini, 2],
-				[\KeyClarity]
+				[\KeyClarity],
+				[\MFCC],
+				[\Chromagram]
 			];
 			mirFile = SCMIRAudioFile(pathName.fullPath, analysisArgs);
 
@@ -107,7 +109,7 @@ AuditBuffer {
 		}
 	}
 
-	*prMakeFeatures{arg mirFile, featureArgsList;
+	*prMakeFeatures{arg mirFile;
 		var result;
 		var idxInfo;
 		//"Making features".postln;
@@ -118,11 +120,23 @@ AuditBuffer {
 			var featureName, startIndex, numItems;
 			var featureObj, featureData;
 			#featureName, startIndex, numItems = item;
+			//when SCMIR generates default args for some features, e.g. Chromagram
+			//the keys is changed to an instance of a Class. We change it to
+			//a symbol here, leaving that 'bug' in scmir alone.
+			if(featureName.isKindOf(Class), {
+				featureName = featureName.asSymbol;
+			});
+			"featureName: %[%], startIndex: %, numItems: %".format(featureName, featureName.class, startIndex, numItems ).postln;
+
 
 			try{
+				var analysisArgs;
+				if(mirFile.featureinfo[i].size > 1, {
+					analysisArgs = mirFile.featureinfo[i][1..];
+				});
 				featureObj = AuditFeatureData.newFromMirFile(
 					featureName,
-					featureArgsList[i],
+					analysisArgs,
 					mirFile,
 					startIndex,
 					numItems
