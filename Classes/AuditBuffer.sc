@@ -6,7 +6,6 @@ AuditBuffer {
 	var <features;//TEMP getter [AuditFeatureData]
 	var <soundFile;//TEMP getter
 	var samples;//sclang sample values from buffer
-	var range; //the main range for frames to be selected from
 	var frames;
 
 	*new{arg server;
@@ -31,29 +30,33 @@ AuditBuffer {
 		^buffer.duration;
 	}
 
-  bufnum {
-    ^buffer.bufnum;
-  }
+	bufnum {
+		^buffer.bufnum;
+	}
 
-	findQualifiedSegmentIndexes{arg criterions;
-		var result;
-		var tempIndexes;
-		tempIndexes = criterions.collect({arg criterion, i;
-      criterion.findQualifiedSegmentIndexes(features[criterion.name]).asSet;
-		});
-		result = tempIndexes.first;
-		if(tempIndexes.size > 1, {
-			tempIndexes[1..].do({arg item;
-				result = result.sect(item);
+	findQualifiedSegmentIndexes{arg ...criterions;
+		var result = Set.new;
+		//each criterion is for a declared feature name
+		criterions.do({arg criterion, i;
+			var featureData;
+			if(criterion.isKindOf(Symbol), {
+				featureData = features[criterion];
+			}, {
+				if(criterion.isKindOf(AuditAnalysisArgs), {
+					//check if there is one that have matching analysis args.
+					featureData = features.values.detect({arg it; it == criterion});
+				});
 			});
-    });
+			if(featureData.isNil, {
+				Error("Did not find feature data for criterion arg: '%'".format(criterion)).throw;
+			});
+			result.addAll( featureData.findQualifiedSegmentIndexes(criterion) );
+		});
 		^result.asArray.sort;
 	}
 
-	findQualifiedStartTimes{arg criterions;
-		^mirFile.frameStartTimes.atAll(
-			this.findQualifiedSegmentIndexes(criterions);
-		);
+	getStartTimes{arg indexes;
+		^mirFile.frameStartTimes.atAll(indexes);
 	}
 
 	findQualifiedSegments{arg criterions;

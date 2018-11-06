@@ -27,7 +27,6 @@ AuditFileBuffer : AuditBuffer {
         var pn = PathName(path);
         var mirPath = pn.pathOnly ++ pn.fileNameWithoutExtension ++ ".scmirZ";
         if(File.exists(mirPath), {
-
           mirFile = SCMIRAudioFile.newFromZ(mirPath);
           features = this.class.prMakeFeatures(mirFile, tempAnalysisArgs);
         });

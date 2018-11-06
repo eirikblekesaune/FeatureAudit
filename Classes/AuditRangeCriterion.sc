@@ -1,8 +1,8 @@
 AuditRangeCriterion : AuditCriterion {
 	var <min, <max;
 
-	*new{arg name, specs, min = 0.0, max = 1.0;
-		^super.new(name, specs).min_(min).max_(max);
+	*new{arg featureName, itemName, specs, min = 0.0, max = 1.0;
+		^super.new(featureName, itemName, specs).min_(min).max_(max);
 	}
 
 	findQualifiedSegmentIndexes{arg feature;

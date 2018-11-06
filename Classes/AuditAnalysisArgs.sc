@@ -1,47 +1,41 @@
-AuditFeatureArgs {
-	var <type;//the type of analysis data e.g. Loudness
+AuditAnalysisArgs {
+	var <featureName;//the featureName of analysis data e.g. Loudness
 	var <args;
 	var <specs;
 
 	classvar <specs;
 
-	*new{arg type, args, specs;
-		if(type.isNil, {
-			Error("must have feature args type").throw;
-			^nil;
-		});
-		if(this.specs.includesKey(type).not, {
-			Error("unknown feature args type: ''".format(type)).throw;
-			^nil;
-		});
-		^super.newCopyArgs(type, args).init(specs);
+	*new{arg featureName, args, specs;
+		^super.newCopyArgs(featureName, args).init(specs);
 	}
 
 	init{arg specs_;
-		specs = specs_ ?? {
-			this.class.specs[type];
-		};
+		specs = specs_;
+		if(specs.isNil, {
+			specs = this.class.getSpecs(featureName);
+		});
 	}
 
 	set{arg key, val;
-		var index = this.class.specs[type].keys.indexOf(key);
+		var index = this.specs[featureName].keys.indexOf(key);
 		args.put(index, val);
 	}
 
 	get{arg key;
 		var result;
-		var index = this.class.specs[type].keys.indexOf(key);
+		var index = this.specs[featureName].keys.indexOf(key);
 		result = args[index];
 		^result;
 	}
 
 	asSCMIRArgs{
-		var result = [type];
+		var result = [featureName];
 		if(args.notNil, {
 			result = result ++ args;
 		});
 		^result;
 	}
+
 	asArray{ ^this.asSCMIRArgs; }
 
 	=={arg what;
@@ -55,7 +49,7 @@ AuditFeatureArgs {
 	keys{ ^specs.keys; }
 
 	hash{
-		^this.instVarHash([\type, \args]);
+		^this.instVarHash([\featureName, \args]);
 	}
 
 	printOn{arg stream;
@@ -73,6 +67,14 @@ AuditFeatureArgs {
 //		specControlsView = View().layout_(VLayout(
 //		);
 //		^View(parent, bounds)
+	}
+
+	*getSpecs{arg featureName;
+		var result = VTMOrderedIdentityDictionary.new;
+		if(this.specs.includesKey(featureName), {
+			result = this.specs[featureName];
+		});
+		^result;
 	}
 
 	*initClass{

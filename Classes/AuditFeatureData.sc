@@ -1,6 +1,6 @@
 AuditFeatureData{
-	var <name; //a name for this specific data
-	var featureArgs;
+	var <featureName;
+	var <featureArgs;
 	var <data;
 	var <specs;
 	var <>auditBuf;
@@ -11,31 +11,46 @@ AuditFeatureData{
 		this.initSpecs();
 	}
 
-	*new{arg name, featureArgs, data, specs;
+	*new{arg featureName, featureArgs, data, specs;
 		if(this.isValidData(data).not, {
 			Error("invalid feature data").throw;
 			^nil;
 		});
-		^super.newCopyArgs(name, featureArgs.deepCopy, data.deepCopy).init(specs);
+		^super.new().init(featureName, featureArgs.deepCopy, data.deepCopy, specs);
 	}
 
-	*newFromMirFile{arg name, featureArgs, mirFile, startIndex, numItems,  specs;
+	*newFromMirFile{arg featureName, featureArgs, mirFile, startIndex, numItems,  specs;
 		var data;
 		data = this.getDataFromMirFile(mirFile, startIndex, numItems);
-		^this.new(name, featureArgs, data, specs);
+		^this.new(featureName, featureArgs, data, specs);
 	}
 
-	init{arg specs_;
-		if(featureArgs.notNil, {
-			featureArgs = AuditFeatureArgs(featureArgs[0], featureArgs[1..]);
+	init{arg featureName_, featureArgs_, data_, specs_;
+		featureName = featureName_;
+		//the data inits to a dict
+		data = VTMOrderedIdentityDictionary.new;
+		featureArgs = featureArgs_;
+		specs = specs_ ? this.class.getSpecs(featureName, featureArgs);
+
+		if(specs.notNil, {
+			//We found specs for this feature name.
+			//The order of iteration corrsponds to the order in SCMIR lib
+			specs.keysValuesDo({arg analysisArgName, analysisSpec, i;
+				data.put(analysisArgName, data_.at(i));
+			});
 		}, {
-			featureArgs = AuditFeatureArgs('CustomFeature');
+			//Did not specs for this feature name.
+			//We now want a single item data object, using the itemName 'val'
+			if(data_.size == 1, {
+				specs = VTMOrderedIdentityDictionary[\val -> ControlSpec.new];
+				data.put( \val, data_.at(0) );
+			}, {
+				Error("Something wrong with the feature data and its specs: '%'".format(
+					featureName
+				)).throw;
+			})
 		});
-		specs = specs_ ? this.class.getSpecs(featureArgs);
 	}
-
-	type{ ^featureArgs.type; }
-	args{ ^featureArgs.args; }
 
 	*getDataFromMirFile{arg mirFile, startIndex = 0, numItems = 1;
 		var result;
@@ -60,6 +75,8 @@ AuditFeatureData{
 		^data.size;
 	}
 
+	itemNames{ ^data.keys; }
+
 	//returns boolean true if data was valid
 	setData{arg arr;
 		//a multichannel array of values between 0.0 and 1.0
@@ -80,12 +97,24 @@ AuditFeatureData{
 	}
 
 	numSegments {
-		^data[0].size;
+		^data.first.size;
 	}
 
-	segments{arg atItem = 0;
+	segments{arg atItem = \val;
 		^data[atItem];
 	}
+
+	findQualifiedSegmentIndexes{arg criterion;
+		var result = [];
+		// criterion
+		this.segments.do({arg val, i;
+			if(criterion.qualify(val), {
+				result = result.add(i);
+			});
+		});
+		^result;
+	}
+
 
 	makeView{arg parent, bounds, featureArgs;
 	}
@@ -102,7 +131,7 @@ AuditFeatureData{
 	}
 
 	*initSpecs{
-		//the return values from the feature analysis are based on SCMIR documetnation and SCMIRAudioFile
+		//the return values from the feature analysis are based on SCMIR documentation and SCMIRAudioFile
 		//implementation
 		specs = VTMOrderedIdentityDictionary[
 			\MFCC -> {arg featureArgs;
@@ -165,12 +194,12 @@ AuditFeatureData{
 				var result = VTMOrderedIdentityDictionary[
 					\pitch -> \midi.asSpec.units_(\midinote)
 				];
-				if(featureArgs.args.notEmpty, {
+				if(featureArgs.notEmpty, {
 					result.put(\hasFreq, ControlSpec(0.0, 1.0));
 				});
 				result;
 			},
-			\Tempo -> { 
+			\Tempo -> {
 				VTMOrderedIdentityDictionary[
 					\bpm -> ControlSpec(0.0, 320.0)
 				]
@@ -203,17 +232,10 @@ AuditFeatureData{
 		];
 	}
 
-	*getSpecs{arg featureArgs;
+	*getSpecs{arg featureName, featureArgs;
 		var result;
-		if(featureArgs.notNil,{
-		   	if(specs.includesKey(featureArgs.type), {
-				result = specs[featureArgs.type].value(featureArgs);
-			});
-		}, {
-			//if the item specs are not defined we assume that it is a single item spec
-			result = VTMOrderedIdentityDictionary[
-				\value -> ControlSpec(0.0, 1.0)
-			];
+		if(specs.includesKey(featureName), {
+			result = specs[featureName].value(featureArgs);
 		});
 		^result;
 	}

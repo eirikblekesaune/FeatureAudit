@@ -1,12 +1,13 @@
 AuditCriterion{
-	var <name;
+	var <featureName;
+	var <itemName;
 	var <>specs;
 	var <>active = true;
 	var <inverse = false;
 	var >testFunction;
 
-	*new{arg name, specs;
-		^super.newCopyArgs( name, specs );
+	*new{arg featureName, itemName = 'value', specs;
+		^super.newCopyArgs( featureName, itemName, specs );
 	}
 
 	findQualifiedSegmentIndexes{arg feature;
@@ -25,9 +26,15 @@ AuditCriterion{
 		var result, segIndexes;
 		segIndexes = this.findQualifiedSegmentIndexes(feature);
 		segIndexes = segIndexes.clumpConsecutive;
-		result = segIndexes.collect({arg indexes, i; 
+		result = segIndexes.collect({arg indexes, i;
 			AuditSection(indexes.first, indexes.last);
 		});
+		^result;
+	}
+
+	qualify{arg val;
+		var result = false;
+		result = testFunction.value(val);
 		^result;
 	}
 
@@ -79,6 +86,10 @@ AuditBinaryCriterion {
 			}
 		);
 		^result.asArray.sort;
+	}
+
+	not{
+		^this.deepCopy.inverse_(true);
 	}
 
 	or{arg aCriterion;
