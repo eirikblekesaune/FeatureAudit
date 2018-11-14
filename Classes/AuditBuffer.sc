@@ -179,5 +179,25 @@ AuditBuffer {
 	numChannels{
 		^buffer.numChannels;
 	}
+
+	plot{
+		//TODO: plot buffer and features here
+	}
+
+	plotFeature{arg which, itemKey;
+		if(features.includesKey(which), {
+			var data = features[which].data;
+			if(itemKey.isNil, {
+				data.values.asArray.plot;
+			}, {
+				data[itemKey].plot;
+			});
+		});
+
+	}
+
+	sampleRate{
+		^buffer.sampleRate;
+	}
 }
 
