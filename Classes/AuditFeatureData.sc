@@ -33,9 +33,12 @@ AuditFeatureData{
 
 		featureArgsSpecs = AuditAnalysisArgs.getSpecs(featureName);
 		featureArgsDict = VTMOrderedIdentityDictionary.new;
-		featureArgsSpecs.keysValuesDo({arg featureArgName, featureArgSpec, i;
-			featureArgsDict.put(featureArgName, featureArgs_[i]);
+		if(featureArgs_.notNil, {
+			featureArgsSpecs.keysValuesDo({arg featureArgName, featureArgSpec, i;
+				featureArgsDict.put(featureArgName, featureArgs_[i]);
+			});
 		});
+
 		specs = specs_ ? this.class.getSpecs(featureName, featureArgsDict);
 
 		if(specs.notNil, {

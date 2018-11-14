@@ -43,14 +43,20 @@ AuditBuffer {
 				featureData = features[criterion];
 			}, {
 				if(criterion.isKindOf(AuditAnalysisArgs), {
-					//check if there is one that have matching analysis args.
-					featureData = features.values.detect({arg it; it == criterion});
+					//check if there is one that have matching
+					//analysis args.
+					featureData = features.values.detect({arg it;
+						it == criterion});
 				});
 			});
 			if(featureData.isNil, {
-				Error("Did not find feature data for criterion arg: '%'".format(criterion)).throw;
+				Error("Did not find feature
+					data for criterion arg: '%'".format(criterion)
+				).throw;
 			});
-			result.addAll( featureData.findQualifiedSegmentIndexes(criterion) );
+			result.addAll(
+				featureData.findQualifiedSegmentIndexes(criterion)
+			);
 		});
 		^result.asArray.sort;
 	}
@@ -112,7 +118,7 @@ AuditBuffer {
 	*prMakeFeatures{arg mirFile;
 		var result;
 		var idxInfo;
-		//"Making features".postln;
+		"Making features".postln;
 		idxInfo = mirFile.featureinfo.collect(_.first);
 		idxInfo = idxInfo +++ mirFile.resolveFeatureNumbers;
 		result = IdentityDictionary.new;
@@ -120,13 +126,16 @@ AuditBuffer {
 			var featureName, startIndex, numItems;
 			var featureObj, featureData;
 			#featureName, startIndex, numItems = item;
-			//when SCMIR generates default args for some features, e.g. Chromagram
-			//the keys is changed to an instance of a Class. We change it to
-			//a symbol here, leaving that 'bug' in scmir alone.
+			//when SCMIR generates default args for some features,
+			//e.g. Chromagram the keys is changed to an instance of a
+			//Class. We change it to a symbol here, leaving that 'bug'
+			//in scmir alone.
 			if(featureName.isKindOf(Class), {
 				featureName = featureName.asSymbol;
 			});
-			"featureName: %[%], startIndex: %, numItems: %".format(featureName, featureName.class, startIndex, numItems ).postln;
+			"featureName: %[%], startIndex: %, numItems: %".format(
+				featureName, featureName.class, startIndex, numItems
+			).postln;
 
 
 			try{
@@ -147,7 +156,6 @@ AuditBuffer {
 				).warn;
 				err.throw;
 			};
-
 			result.put( featureName, featureObj);
 		};
 		^result;

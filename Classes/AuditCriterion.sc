@@ -1,13 +1,30 @@
 AuditCriterion{
 	var <featureName;
 	var <itemName;
-	var <>specs;
+	var <featureArgs;
+	var <specs;
 	var <>active = true;
 	var <inverse = false;
 	var >testFunction;
 
-	*new{arg featureName, itemName = 'value', specs;
-		^super.newCopyArgs( featureName, itemName, specs );
+	*new{arg featureName, itemName, featureArgs, specs;
+		^super.newCopyArgs( featureName, itemName ).initCriterion(
+			featureArgs, specs
+		);
+	}
+
+	initCriterion{arg featureArgs_, specs_;
+		specs = specs_;
+		featureArgs = featureArgs_;
+		if(AuditFeatureData.specs.includesKey(featureName), {
+			specs = AuditFeatureData.getSpecs(featureName, featureArgs);
+			if(itemName.isNil, {
+				itemName = specs.keys.first;
+			});
+		});
+		if(itemName.isNil, {
+			itemName = 'value';
+		});
 	}
 
 	findQualifiedSegmentIndexes{arg feature;
