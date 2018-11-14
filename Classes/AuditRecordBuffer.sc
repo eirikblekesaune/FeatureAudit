@@ -2,7 +2,7 @@ AuditRecordBuffer : AuditBuffer {
 	var recBuffer;
 	var recSynth;
 	var recFilepath;
-  var <recPeak;
+	var <recPeak;
 	var tempRecFilepath;
 	var numChannels;
 	var recIndicator;
@@ -73,7 +73,7 @@ AuditRecordBuffer : AuditBuffer {
 				addAction: addAction
 			);
 
-      // "Started recording '%'".format(tempRecFilepath).postln;
+			// "Started recording '%'".format(tempRecFilepath).postln;
 			thisOne = thisThread;
 			recIndicator = fork{
 				var i = 0;
@@ -83,9 +83,9 @@ AuditRecordBuffer : AuditBuffer {
 					});
 					1.0.wait;
 					i = i + 1;
-          // "\tRecording dur: % of % from busnums: % [%]".format(
-          //   i, recDuration, busnums, recFilepath
-          // ).postln;
+					// "\tRecording dur: % of % from busnums: % [%]".format(
+					//   i, recDuration, busnums, recFilepath
+					// ).postln;
 				}
 			};
 			recSynth.onFree({
@@ -104,7 +104,7 @@ AuditRecordBuffer : AuditBuffer {
 			if(recIndicator.notNil and: {recIndicator.isPlaying}, {
 				recIndicator.stop;
 			});
-      // "Stopping recording '%'".format(tempRecFilepath).postln;
+			// "Stopping recording '%'".format(tempRecFilepath).postln;
 			recSynth.free;
 			0.1.wait;
 			if(recBuffer.notNil, {
@@ -146,8 +146,8 @@ AuditRecordBuffer : AuditBuffer {
 	normalize{
 		var tempSoundFile;
 		tempSoundFile = SoundFile.openRead(tempRecFilepath);
-    recPeak = tempSoundFile.channelPeaks.maxItem;
-    "Rec peak: %".format(recPeak).post;
+		recPeak = tempSoundFile.channelPeaks.maxItem;
+		"Rec peak: %".format(recPeak).post;
 
 		while({ tempSoundFile.isOpen.not; }, {
 			//"opening file".postln;
