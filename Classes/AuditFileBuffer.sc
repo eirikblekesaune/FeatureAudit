@@ -10,9 +10,8 @@ AuditFileBuffer : AuditBuffer {
 			soundFile.openRead;
 			buffer = Buffer.read(server, path);
 			if(loadLocalMirFile, {
-				var pn = PathName(path);
-				var mirPath = pn.pathOnly ++ pn.fileNameWithoutExtension ++ ".scmirZ";
-				if(File.exists(mirPath), {
+				if(this.localMirFileExists, {
+					var mirPath = this.localMirFilePath;
 					mirFile = SCMIRAudioFile.newFromZ(mirPath);
 					features = this.class.prMakeFeatures(mirFile);
 				});
