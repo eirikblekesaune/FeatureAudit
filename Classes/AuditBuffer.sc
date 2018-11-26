@@ -7,6 +7,8 @@ AuditBuffer {
 	var <soundFile;//TEMP getter
 	var samples;//sclang sample values from buffer
 	var frames;
+	var channelPeaks; //dictionary with index: peakValue
+	var normalizeFactor;
 
 	*new{arg server;
 		^super.new.initAuditBuffer(server);
@@ -50,8 +52,7 @@ AuditBuffer {
 				});
 			});
 			if(featureData.isNil, {
-				Error("Did not find feature
-					data for criterion arg: '%'".format(criterion)
+				Error("Did not find featuredata for criterion arg: '%'".format(criterion)
 				).throw;
 			});
 			result.addAll(
@@ -177,7 +178,7 @@ AuditBuffer {
 	}
 
 	numChannels{
-		^buffer.numChannels;
+		^soundFile.numChannels;
 	}
 
 	plot{
@@ -196,8 +197,145 @@ AuditBuffer {
 
 	}
 
-	sampleRate{
-		^buffer.sampleRate;
+	//optionally with arguments
+	//async function
+	channelPeaks{arg startFrame = 0, numFrames, chunkSize = 1048576, threaded = false;
+		var result;
+		var rawData, peak, numChunks, chunksDone, test;
+		var shouldCache = false;
+		//if we already have found the peaks and the method call
+		//wants the whole file we just return the cached value.
+		if(numFrames.isNil, {
+			if(channelPeaks.notNil, {
+				^channelPeaks;
+			}, {
+				//cache only this concernes the whole sound file.
+				shouldCache = true;
+			});
+		});
+
+		//this code is based on the the code from SoundFile.channelPeaks
+		peak = 0 ! this.numChannels;
+		numFrames = numFrames ? this.numFrames;
+		numFrames = numFrames * this.numChannels;
+
+		if(threaded) {
+			numChunks = (numFrames / chunkSize).roundUp(1);
+			chunksDone = 0;
+		};
+
+		soundFile.seek(startFrame, 0);
+		while(
+			{ (numFrames > 0) and: {
+				rawData = FloatArray.newClear(min(numFrames, chunkSize));
+				soundFile.readData(rawData);
+				rawData.size > 0;
+			}},
+			{
+				rawData.do({ |samp, i|
+					if(samp.abs > peak[i % this.numChannels], {
+						peak[i % this.numChannels] = samp.abs;
+					});
+				});
+				numFrames = numFrames - chunkSize;
+				if(threaded, {
+					chunksDone = chunksDone + 1;
+					test = chunksDone / numChunks;
+					if(	((chunksDone-1) / numChunks) < test.round(0.02)
+						and: { test >= test.round(0.02) },
+						{
+							$..post;
+						}
+					);
+					0.01.wait;
+				});
+			}
+		);
+		if(threaded) { $\n.postln };
+
+		//Cache the channel peaks for the whole file if this was the
+		//result.
+		if(shouldCache, {
+			channelPeaks = peak;
+			normalizeFactor = channelPeaks.maxItem.reciprocal;
+		});
+		^peak
 	}
+
+	normalizeFactor{arg findPeaksIfNil = false, chunkSize = 1048576, threaded = false;
+		if(normalizeFactor.notNil, {
+			^normalizeFactor;
+		}, {
+			if(findPeaksIfNil, {
+				this.channelPeaks(chunkSize, threaded);
+				^normalizeFactor;
+			}, {
+				"AuditBuffer:normalizeFactor - channelPeaks not calculated yet".warn;
+				^1.0;
+			});
+		});
+	}
+
+	sampleRate{
+		^soundFile.sampleRate;
+	}
+
+	numFrames{
+		^soundFile.numFrames;
+	}
+
+	importMarkersRegionsFromReaper{arg csvFilepath;
+		var result = [], fileInput;
+		fileInput = CSVFileReader.readDictionaries(
+			"/Users/eirikblekesaune/Dropbox/Prosjekter/Album/KampenStillheter/"
+			++ "KampenOriginal/KampenOriginal_regions_markers.csv"
+		);
+		fileInput.collect({arg it;
+			result = result.add(
+				AuditRegion.newFromReaperMarker(it, this)
+			);
+		});
+		^result;
+	}
+
+	localMirFilePath{
+		var pn = PathName(soundFile.path);
+		var result = pn.pathOnly ++ pn.fileNameWithoutExtension ++ ".scmirZ";
+		^result;
+	}
+
+	localMirFileExists{
+		^File.exists(this.localMirFilePath);
+	}
+
+	*synthDefs{
+		^[1,2,4].collect({arg numChannels;
+			SynthDef("audBufPlayFixed%".format(numChannels).asSymbol, {
+				|
+				bufnum, start = 0, attack = 0.0, decay = 0.0, sus = 1.0, release = 0.0,
+				amp = 0.1, out = 0, dur = 1.0, rate = 1.0, loop = 0
+				|
+				var sig, env;
+				var sustainTime = dur - attack - decay - release;
+				var endFrameTrigger = TDuty.ar(dur);
+				env = EnvGen.kr(
+					Env([0.00001, 1.0, sus, sus, 0.00001],
+						[attack, decay, sustainTime, release],
+						\exp),
+					doneAction: 2
+				).poll;
+				sig = PlayBuf.ar(
+					numChannels,
+					bufnum,
+					rate,
+					trigger: endFrameTrigger * loop,
+					startPos: start,
+					loop: loop
+				);
+				Out.ar(0, sig * env * amp);
+			});
+		});
+	}
+
 }
 
