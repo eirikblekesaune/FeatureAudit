@@ -60,6 +60,14 @@ AuditRegion {
 		^(this.numFrames / auditBuf.sampleRate);
 	}
 
+	startTime{
+		^(startFrame /  auditBuf.sampleRate);
+	}
+
+	endTime{
+		^(endFrame /  auditBuf.sampleRate);
+	}
+
 	channelPeaks{arg chunkSize = 1048576, threaded = false;
 		var result;
 		if(channelPeaks.notNil, {
