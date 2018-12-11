@@ -9,6 +9,7 @@ AuditBuffer {
 	var frames;
 	var channelPeaks; //dictionary with index: peakValue
 	var normalizeFactor;
+	var <markers;
 
 	*new{arg server;
 		^super.new.initAuditBuffer(server);
@@ -16,6 +17,7 @@ AuditBuffer {
 
 	initAuditBuffer{arg server_;
 		server = server_ ? Server.default;
+		markers = [];
 	}
 
 	free{arg action;
@@ -286,16 +288,21 @@ AuditBuffer {
 
 	importMarkersRegionsFromReaper{arg csvFilepath;
 		var result = [], fileInput;
-		fileInput = CSVFileReader.readDictionaries(
-			"/Users/eirikblekesaune/Dropbox/Prosjekter/Album/KampenStillheter/"
-			++ "KampenOriginal/KampenOriginal_regions_markers.csv"
-		);
-		fileInput.collect({arg it;
-			result = result.add(
-				AuditRegion.newFromReaperMarker(it, this)
+		if(File.exists(csvFilepath), {
+			fileInput = CSVFileReader.readDictionaries(
+				csvFilepath
 			);
+			fileInput.collect({arg it;
+				result = result.add(
+					AuditRegion.newFromReaperMarker(it, this)
+				);
+			});
+			markers = markers.addAll(result);
+			^result;
+		}, {
+			"Reaper marker file not found: '%'".format(csvFilepath).warn;
+			^nil;
 		});
-		^result;
 	}
 
 	localMirFilePath{
