@@ -99,7 +99,7 @@ AuditRegion {
 	bufnum{ ^auditBuf.bufnum; }
 
 	play {arg server, mul = 0.1, loop = false, normalize = false;
-		var normFactor;
+		var normFactor = 1.0;
 		if(normalize, {
 			normFactor = this.normalizeFactor;
 		});
@@ -117,7 +117,7 @@ AuditRegion {
 			if(loop.not, {
 				FreeSelf.kr(TDelay.kr(Impulse.kr(0), this.duration));
 			});
-			player * mul * normFactor.postln;
+			player * mul * normFactor;
 		}.play(server ? Server.default);
 	}
 }
