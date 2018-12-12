@@ -120,4 +120,19 @@ AuditRegion {
 			player * mul * normFactor;
 		}.play(server ? Server.default);
 	}
+
+	asDictionary{
+		var result;
+		result = VTMOrderedIdentityDictionary[
+			\audiofile -> auditBuf.soundFile.path.asString,
+			\name -> this.name,
+			\startTime -> this.startTime,
+			\endTime -> this.endTime,
+			\tags -> this.tags,
+			\track -> this.track,
+			\channelPeaks -> this.channelPeaks
+		];
+		^result;
+	}
+
 }

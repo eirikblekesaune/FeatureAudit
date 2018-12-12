@@ -343,5 +343,25 @@ AuditBuffer {
 		});
 	}
 
+	asDictionary{
+		var result;
+		result = VTMOrderedIdentityDictionary[
+			\audiofile -> this.soundFile.path.asString,
+			\mirFilepath -> mirFilepath,
+			\channelPeaks -> this.channelPeaks
+		];
+		if(markers.isEmpty.not, {
+			var markersDictArray;
+			markersDictArray = markers.collect({arg it;
+				var markerDict = it.asDictionary;
+				//in this context the audiofile data is redundant
+				markerDict.removeAt(\audiofile);
+				markerDict;
+			});
+			result.put(\markers, markersDictArray);
+		});
+		^result;
+	}
+
 }
 
