@@ -363,5 +363,66 @@ AuditBuffer {
 		^result;
 	}
 
+	//write a JSON file with channel peaks and markers data (and its channel peaks)
+	writeFeatureAuditDataFile{arg filepath, overwriteExisting = false;
+		var result;
+		var file, shouldWriteFile = false;
+		//use path local to sound file per default
+		filepath = filepath ?? {soundFile.path.asString ++ ".auditdata.json"};
+		if(File.exists(filepath), {
+			if(overwriteExisting, {
+				shouldWriteFile = true;
+			})
+		}, {
+			shouldWriteFile = true;
+		});
+		if(shouldWriteFile, {
+			file = File.new(filepath, "w");
+			file.putAll(JSON.stringify(this.asDictionary));
+			file.close;
+		});
+
+		^result;
+	}
+
+	loadFeatureAuditDataFile{arg filepath;
+		var inDict;
+		//use path local to sound file per default
+		filepath = filepath ?? {soundFile.path.asString ++ ".auditdata.json"};
+		if(File.exists(filepath), {
+			inDict = filepath.parseYAMLFile;
+			inDict = inDict.changeScalarValuesToDataTypes;
+			inDict = inDict.asIdentityDictionaryWithSymbolKeys;
+			//read channel peaks from file
+			channelPeaks = inDict[\channelPeaks];
+
+			//get the markers and add them this instance
+			inDict[\markers].do({arg marker;
+				markers = markers.add(
+					AuditRegion.newFromSecs(
+						name: marker[\name],
+						auditBuf: this,
+						startTime: marker[\startTime],
+						endTime: marker[\endTime],
+						tags: marker[\tags],
+						track: marker[\track],
+						channelPeaks: marker[\channelPeaks]
+					);
+				);
+			});
+		}, {
+			"Audit data file not found: '%'".format(filepath).postln;
+		});
+		^inDict;
+	}
+
+	hasFeatureAuditDataFile{
+		//check if the audiofile has a feature audit JSON data file local to it.
+		if(File.exists((soundFile.path.asString ++ ".auditdata.json")), {
+			^true;
+		});
+		^false;
+	}
+
 }
 
