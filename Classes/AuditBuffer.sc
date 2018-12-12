@@ -316,31 +316,73 @@ AuditBuffer {
 
 	*synthDefs{
 		^[1,2,4].collect({arg numChannels;
-			SynthDef("audBufPlayFixed%".format(numChannels).asSymbol, {
-				|
-				bufnum, start = 0, attack = 0.0, decay = 0.0, sus = 1.0, release = 0.0,
-				amp = 0.1, out = 0, dur = 1.0, rate = 1.0, loop = 0
-				|
-				var sig, env;
-				var sustainTime = dur - attack - decay - release;
-				var endFrameTrigger = TDuty.ar(dur);
-				env = EnvGen.kr(
-					Env([0.00001, 1.0, sus, sus, 0.00001],
-						[attack, decay, sustainTime, release],
-						\exp),
-					doneAction: 2
-				).poll;
-				sig = PlayBuf.ar(
-					numChannels,
-					bufnum,
-					rate,
-					trigger: endFrameTrigger * loop,
-					startPos: start,
-					loop: loop
-				);
-				Out.ar(0, sig * env * amp);
-			});
-		});
+			[
+				SynthDef("audBufPlayFixed%".format(numChannels).asSymbol, {
+					|
+					bufnum, start = 0, attack = 0.0, decay = 0.0, sus = 1.0, rel = 0.0,
+					amp = 0.1, out = 0, end = 0.0, rate = 1.0, loop = 0
+					|
+					var sig, env;
+					var duration = (end - start) / BufSampleRate.ir(bufnum);
+					var sustainTime = duration - attack - decay - rel;
+					var endFrameTrigger = TDuty.ar(duration);
+					env = EnvGen.kr(
+						Env([0.00001, 1.0, sus, sus, 0.00001],
+							[attack, decay, sustainTime, rel],
+							\exp),
+						doneAction: 2
+					);
+					sig = PlayBuf.ar(
+						numChannels,
+						bufnum,
+						rate,
+						trigger: endFrameTrigger * loop,
+						startPos: start,
+						loop: loop
+					);
+					Out.ar(out, sig * env * amp);
+				}),
+				SynthDef("audBufPlaySustained%".format(numChannels).asSymbol, {
+					|
+					bufnum, start = 0, attack = 0.0, decay = 0.0, sus = 1.0, rel = 0.0,
+					amp = 0.1, out = 0, end = 0.0, rate = 1.0, loop = 0, gate = 1.0
+					|
+					var sig, env;
+					var duration = (end - start) / BufSampleRate.ir(bufnum);
+					var sustainTime = duration - attack - decay - rel;
+					var endFrameTrigger = TDuty.ar(duration);
+					var playbufEnv;
+					// (Sweep.ar(endFrameTrigger) + (start/BufSampleRate.ir(bufnum))).poll(label: \pos);
+					env = EnvGen.kr(
+						Env([0.00001, 1.0, sus, sus, 0.00001],
+							[attack, decay, sustainTime, rel],
+							\exp,
+							3 //the last sustain node
+						),
+						gate: gate,//* Demand.kr(T2K.kr(endFrameTrigger), 0, Dseq([1.0, 0.0 + loop], 1)),
+						doneAction: 2
+					);
+
+					playbufEnv = EnvGen.kr(
+						Env([0.00001, 1.0, sus, sus, 0.00001],
+							[attack, decay, sustainTime, rel],
+							\exp
+						).circle,
+						doneAction: 2
+					);
+
+					sig = PlayBuf.ar(
+						numChannels,
+						bufnum,
+						rate,
+						trigger: endFrameTrigger * loop,
+						startPos: start,
+						loop: loop
+					) * playbufEnv;
+					Out.ar(out, sig * env * amp);
+				})
+			]
+		}).flat;
 	}
 
 	asDictionary{
