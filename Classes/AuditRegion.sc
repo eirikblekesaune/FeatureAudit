@@ -8,17 +8,17 @@ AuditRegion {
 	var channelPeaks;
 	var normalizeFactor;
 
-	*new{arg name, auditBuf, startFrame, endFrame, tags, track;
-		^super.new.init(name, auditBuf, startFrame, endFrame, tags, track);
+	*new{arg name, auditBuf, startFrame, endFrame, tags, track, channelPeaks;
+		^super.new.init(name, auditBuf, startFrame, endFrame, tags, track, channelPeaks);
 	}
 
-	*newFromSecs{arg name, auditBuf, startTime, endTime, tags, track;
+	*newFromSecs{arg name, auditBuf, startTime, endTime, tags, track, channelPeaks;
 		var startFrame, endFrame;
 		//the time is in secs float.
 		//this divided by sample rate given how many frames
 		startFrame = (startTime * auditBuf.sampleRate).asInteger;
 		endFrame = (endTime * auditBuf.sampleRate).asInteger;
-		^this.new(name, auditBuf, startFrame, endFrame, tags, track);
+		^this.new(name, auditBuf, startFrame, endFrame, tags, track, channelPeaks);
 	}
 
 	*newFromReaperMarker{arg reaperMarkerDict, featureBuf;
@@ -43,13 +43,14 @@ AuditRegion {
 		^result;
 	}
 
-	init{arg name_, auditBuf_, startFrame_, endFrame_, tags_, track_;
+	init{arg name_, auditBuf_, startFrame_, endFrame_, tags_, track_, channelPeaks_;
 		name = name_;
 		auditBuf = auditBuf_;
 		startFrame = startFrame_;
 		endFrame = endFrame_;
 		tags = tags_ ? [];
 		track = track_;
+		channelPeaks = channelPeaks_;
 	}
 
 	numFrames{
