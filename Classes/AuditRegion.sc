@@ -78,17 +78,16 @@ AuditRegion {
 			chunkSize, threaded
 		);
 		channelPeaks = result;
-		normalizeFactor = channelPeaks.maxItem.reciprocal;
 		^result;
 	}
 
 	normalizeFactor{arg findPeaksIfNil = false, chunkSize = 1048576, threaded = false;
-		if(normalizeFactor.notNil, {
-			^normalizeFactor;
+		if(channelPeaks.notNil, {
+			^normalizeFactor = channelPeaks.maxItem.reciprocal;
 		}, {
 			if(findPeaksIfNil, {
 				this.channelPeaks(chunkSize, threaded);
-				^normalizeFactor;
+				^this.normalizeFactor;
 			}, {
 				"AuditRegion:normalizeFactor - channelPeaks not calculated yet".warn;
 				^1.0;

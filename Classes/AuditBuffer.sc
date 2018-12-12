@@ -259,18 +259,17 @@ AuditBuffer {
 		//result.
 		if(shouldCache, {
 			channelPeaks = peak;
-			normalizeFactor = channelPeaks.maxItem.reciprocal;
 		});
 		^peak
 	}
 
 	normalizeFactor{arg findPeaksIfNil = false, chunkSize = 1048576, threaded = false;
-		if(normalizeFactor.notNil, {
-			^normalizeFactor;
+		if(channelPeaks.notNil, {
+			^normalizeFactor = channelPeaks.maxItem.reciprocal;
 		}, {
 			if(findPeaksIfNil, {
 				this.channelPeaks(chunkSize, threaded);
-				^normalizeFactor;
+				^this.normalizeFactor;
 			}, {
 				"AuditBuffer:normalizeFactor - channelPeaks not calculated yet".warn;
 				^1.0;
