@@ -340,6 +340,11 @@ AuditBuffer {
 						startPos: start,
 						loop: loop
 					);
+					sig = SplayAz.ar(4, sig,
+						\spread.kr(1.0),
+						width: \width.kr(2.0),
+						center: \center.kr(0.0)
+					);
 					Out.ar(out, sig * env * amp);
 				}),
 				SynthDef("audBufPlaySustained%".format(numChannels).asSymbol, {
@@ -379,6 +384,12 @@ AuditBuffer {
 						startPos: start,
 						loop: loop
 					) * playbufEnv;
+					sig = SplayAz.ar(4, sig,
+						\spread.kr(1.0),
+						width: \width.kr(2.0),
+						center: \center.kr(0.0)
+					);
+
 					Out.ar(out, sig * env * amp);
 				})
 			]
