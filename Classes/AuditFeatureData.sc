@@ -174,7 +174,7 @@ AuditFeatureData{
 					numItems = featureArgsDict.at(\n);
 				}, {
 					if(featureArgsDict.isEmpty, {
-						numItems = AuditAnalysisArgs.specs[\Chromagram][\n].default;
+						numItems = AuditFeatureArgs.specs[\Chromagram][\n].default;
 					}, {
 						numItems = featureArgsDict.at(\n)
 					});
