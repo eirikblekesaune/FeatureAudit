@@ -19,7 +19,7 @@ TestAuditFeatureData : VTMUnitTest {
 		//it can not be reached or changed any longer.
 		var obj;
 		var featureArgs;
-		featureArgs = AuditFeatureArgs(\Loudness, []);
+		featureArgs = AuditAnalysisArgs(\Loudness, []);
 	}
 
 	test_NoFeatureArgsShouldGiveArgsTypeNone{
@@ -59,7 +59,7 @@ TestAuditFeatureData : VTMUnitTest {
 		filepath = filepath +/+  "data/mirTestData.scmirZ";
 		mirFile = SCMIRAudioFile.newFromZ(filepath);
 		obj = AuditFeatureData.newFromMirFile(\myLoudness,
-			featureArgs: AuditFeatureArgs( \Loudness ),
+			featureArgs: AuditAnalysisArgs( \Loudness ),
 			mirFile: mirFile,
 			startIndex: 0,
 			numItems: mirFile.numfeatures

@@ -5,7 +5,7 @@ AuditFeatureData{
 	var <featureArgsDict;
 	var <>auditBuf;
 
-	classvar specs;
+	classvar <specs;
 
 	*initClass{
 		this.initSpecs();
@@ -154,7 +154,7 @@ AuditFeatureData{
 					numItems = featureArgsDict.at(\numcoeff);
 				}, {
 					if(featureArgsDict.isEmpty, {
-						numItems = AuditFeatureArgs.specs[\MFCC][\numcoeff].default;
+						numItems = AuditAnalysisArgs.specs[\MFCC][\numcoeff].default;
 					}, {
 						numItems = featureArgsDict.at(\numcoeff);
 					});
@@ -174,7 +174,7 @@ AuditFeatureData{
 					numItems = featureArgsDict.at(\n);
 				}, {
 					if(featureArgsDict.isEmpty, {
-						numItems = AuditFeatureArgs.specs[\Chromagram][\n].default;
+						numItems = AuditAnalysisArgs.specs[\Chromagram][\n].default;
 					}, {
 						numItems = featureArgsDict.at(\n)
 					});

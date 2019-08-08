@@ -1,10 +1,10 @@
-TestAuditFeatureArgs : VTMUnitTest {
+TestAuditAnalysisArgs : VTMUnitTest {
 
 	test_MustHaveTypeArg{
 		var obj;
 		var testString = "Should fail when no type arg given";
 		try{
-			obj = AuditFeatureArgs();
+			obj = AuditAnalysisArgs();
 			this.failed(thisMethod, testString);
 		} {
 			this.passed(thisMethod, testString);
@@ -15,7 +15,7 @@ TestAuditFeatureArgs : VTMUnitTest {
 		var obj;
 		var testString = "Should fail when unknown type arg given";
 		try{
-			obj = AuditFeatureArgs('AnUnknownType');
+			obj = AuditAnalysisArgs('AnUnknownType');
 			this.failed(thisMethod, testString);
 		} {
 			this.passed(thisMethod, testString);
@@ -24,29 +24,29 @@ TestAuditFeatureArgs : VTMUnitTest {
 
 	test_ArrayConversionNoArgs{
 		var obj;
-		obj = AuditFeatureArgs(\Loudness);
+		obj = AuditAnalysisArgs(\Loudness);
 		this.assertEquals(obj.asArray, [\Loudness]);
 	}
 
 	test_ArrayConversionWithOneArg{
 		var obj;
-		obj = AuditFeatureArgs(\Tartini, [1]);
+		obj = AuditAnalysisArgs(\Tartini, [1]);
 		this.assertEquals(obj.asArray, [\Tartini, 1]);
 	}
 
 	test_ArrayConversionWithMultipleArgs{
 		var obj;
 		var args;
-		AuditFeatureArgs.specs[\Loudness].keysValuesDo({arg key, val;
+		AuditAnalysisArgs.specs[\Loudness].keysValuesDo({arg key, val;
 			args = args.add(rrand(val.minval, val.maxval));
 		});
-		obj = AuditFeatureArgs(\Loudness, args);
+		obj = AuditAnalysisArgs(\Loudness, args);
 		this.assertEquals(obj.asArray, [\Loudness] ++ args);
 	}
 
 	test_SetGetArgsByKey{
 		//test all that have args to the feature
-		AuditFeatureArgs.specs.select({arg item;
+		AuditAnalysisArgs.specs.select({arg item;
 			item.notEmpty;
 		}).keysValuesDo({arg type, spec;
 			var obj;
@@ -71,12 +71,12 @@ TestAuditFeatureArgs : VTMUnitTest {
 		var result;
 		var args;
 		if(type.isNil, {
-			type = AuditFeatureArgs.specs.keys.choose;
+			type = AuditAnalysisArgs.specs.keys.choose;
 		});
-		AuditFeatureArgs.specs[type].do{arg item;
+		AuditAnalysisArgs.specs[type].do{arg item;
 			args = args.add(item.random);
 		};
-		result = AuditFeatureArgs(type, args);
+		result = AuditAnalysisArgs(type, args);
 		^result;
 	}
 }
