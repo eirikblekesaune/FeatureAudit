@@ -24,8 +24,8 @@ TestAuditAnalysisArgs : VTMUnitTest {
 
 	test_ArrayConversionNoArgs{
 		var obj;
-		obj = AuditAnalysisArgs(\Loudness);
-		this.assertEquals(obj.asArray, [\Loudness]);
+		obj = AuditAnalysisArgs(\RMS);
+		this.assertEquals(obj.asArray, [\RMS]);
 	}
 
 	test_ArrayConversionWithOneArg{
@@ -48,10 +48,10 @@ TestAuditAnalysisArgs : VTMUnitTest {
 		//test all that have args to the feature
 		AuditAnalysisArgs.specs.select({arg item;
 			item.notEmpty;
-		}).keysValuesDo({arg type, spec;
+		}).keysValuesDo({arg featureName, spec;
 			var obj;
 			var args, newArgs;
-			obj = this.class.makeRandom(type: type);
+			obj = this.class.makeRandom(featureName: featureName);
 			args = obj.args;
 			obj.specs.keysValuesDo({arg specKey, spec;
 				var newVal = spec.random;
@@ -60,23 +60,23 @@ TestAuditAnalysisArgs : VTMUnitTest {
 				this.assertEquals(
 					obj.get(specKey), newVal,
 					"Should set feature args for '%' key: '%'".format(
-						type, specKey
+						featureName, specKey
 					)
 				);
 			});
 		});
 	}
 
-	*makeRandom{arg type;
+	*makeRandom{arg featureName;
 		var result;
 		var args;
-		if(type.isNil, {
-			type = AuditAnalysisArgs.specs.keys.choose;
+		if(featureName.isNil, {
+			featureName = AuditAnalysisArgs.specs.keys.choose;
 		});
-		AuditAnalysisArgs.specs[type].do{arg item;
+		AuditAnalysisArgs.specs[featureName].do{arg item;
 			args = args.add(item.random);
 		};
-		result = AuditAnalysisArgs(type, args);
+		result = AuditAnalysisArgs(featureName, args);
 		^result;
 	}
 }

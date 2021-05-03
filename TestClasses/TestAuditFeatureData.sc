@@ -64,6 +64,5 @@ TestAuditFeatureData : VTMUnitTest {
 			startIndex: 0,
 			numItems: mirFile.numfeatures
 		);
-		1.0.midiratio
 	}
 }

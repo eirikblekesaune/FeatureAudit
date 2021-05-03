@@ -5,32 +5,51 @@ AuditAnalysisArgs {
 
 	classvar <specs;
 
-	*new{arg featureName, args, specs;
-		^super.newCopyArgs(featureName, args).init(specs);
+	*new{arg featureName, args;
+		if(featureName.isNil or: {specs.includesKey(featureName).not}, {
+			Error("Unrecognized feature name: '%'".format(featureName)).throw;
+		});
+		^super.new.init(featureName, args);
 	}
 
-	init{arg specs_;
-		specs = specs_;
-		if(specs.isNil, {
-			specs = this.class.getSpecs(featureName);
+	init{arg featureName_, args_;
+		featureName = featureName_;
+		specs = this.class.getSpecs(featureName);
+		if(args_.isNil, {
+			args = specs.collect(_.default);
+		}, {
+			args = args_;
 		});
 	}
 
 	set{arg key, val;
-		var index = this.specs[featureName].keys.indexOf(key);
-		args.put(index, val);
+		var index;
+		index = this.getArgsIndex(key);
+		if(index.notNil, {
+			args.put(index, val);
+		});
 	}
 
 	get{arg key;
 		var result;
-		var index = this.specs[featureName].keys.indexOf(key);
-		result = args[index];
+		var index = this.getArgsIndex(key);
+		if(index.notNil, {
+			result = args[index];
+		});
 		^result;
+	}
+	
+	getArgsIndex{|key|
+		var index;
+		if(specs.includesKey(key), {
+			index = specs.keys.indexOf(key);
+		});
+		^index;
 	}
 
 	asSCMIRArgs{
 		var result = [featureName];
-		if(args.notNil, {
+		if(args.notNil or: {args.isEmpty}, {
 			result = result ++ args;
 		});
 		^result;
@@ -46,7 +65,12 @@ AuditAnalysisArgs {
 	}
 
 	numArgs{ ^args.size; }
+
 	keys{ ^specs.keys; }
+
+	getSpec{|argKey|
+		^specs[argKey];
+	}
 
 	hash{
 		^this.instVarHash([\featureName, \args]);
