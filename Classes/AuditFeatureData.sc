@@ -2,7 +2,7 @@ AuditFeatureData{
 	var <featureName;
 	var <data;
 	var <specs;
-	var <featureArgsDict;
+	var analysisArgsArray;
 	var <>auditBuf;
 
 	classvar <specs;
@@ -11,28 +11,28 @@ AuditFeatureData{
 		this.initSpecs();
 	}
 
-	*new{arg featureName, featureArgs, data, specs;
+	*new{arg featureName, data, specs, analysisArgsArray;
 		if(this.isValidData(data).not, {
 			Error("invalid feature data").throw;
 			^nil;
 		});
-		^super.new().init(featureName, featureArgs.deepCopy, data.deepCopy, specs);
+		^super.new().init(featureName, data.deepCopy, specs, analysisArgsArray);
 	}
 
-	*newFromMirFile{arg featureName, featureArgs, mirFile, startIndex, numItems,  specs;
+	*newFromMirFile{arg featureName, mirFile, startIndex, numItems, specs;
 		var data;
 		data = this.getDataFromMirFile(mirFile, startIndex, numItems);
-		^this.new(featureName, featureArgs, data, specs);
+		^this.new(featureName, data, specs);
 	}
 
-	init{arg featureName_, featureArgs_, data_, specs_;
+	init{arg featureName_, data_, specs_, analysisArgsArray_;
 		var featureArgsSpecs;
 		featureName = featureName_;
 		//the data inits to a dict
 		data = VTMOrderedIdentityDictionary.new;
 
 		featureArgsSpecs = AuditAnalysisArgs.getSpecs(featureName);
-		featureArgsDict = VTMOrderedIdentityDictionary.new;
+		analysisArgsArray = analysisArgsArray.copy;
 		if(featureArgs_.notNil, {
 			featureArgsSpecs.keysValuesDo({arg featureArgName, featureArgSpec, i;
 				featureArgsDict.put(featureArgName, featureArgs_[i]);
@@ -88,7 +88,7 @@ AuditFeatureData{
 
 	itemNames{ ^data.keys; }
 
-	featureArgs { ^featureArgsDict.values; }
+	analysisArgs { ^analysisArgs.asArray; }
 
 	//returns boolean true if data was valid
 	setData{arg arr;
@@ -140,7 +140,7 @@ AuditFeatureData{
 	}
 
 	hash{
-		^this.instVarHash([\data, \featureArgsDict]);
+		^this.instVarHash([\data, \analysisArgs]);
 	}
 
 	*initSpecs{
