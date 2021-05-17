@@ -32,14 +32,14 @@ AuditFeatureData{
 		data = VTMOrderedIdentityDictionary.new;
 
 		featureArgsSpecs = AuditAnalysisArgs.getSpecs(featureName);
-		analysisArgsArray = analysisArgsArray.copy;
-		if(featureArgs_.notNil, {
-			featureArgsSpecs.keysValuesDo({arg featureArgName, featureArgSpec, i;
-				featureArgsDict.put(featureArgName, featureArgs_[i]);
-			});
-		});
+		analysisArgsArray = analysisArgsArray_.copy;
+		// if(analysisArgsArray.notNil, {
+		// 	featureArgsSpecs.keysValuesDo({arg featureArgName, featureArgSpec, i;
+		// 		featureArgsDict.put(featureArgName, analysisArgsArray[i]);
+		// 	});
+		// });
 
-		specs = specs_ ? this.class.getSpecs(featureName, featureArgsDict);
+		// specs = specs_ ? this.class.getSpecs(featureName, featureArgsDict);
 
 		if(specs.notNil, {
 			//We found specs for this feature name.
@@ -88,7 +88,7 @@ AuditFeatureData{
 
 	itemNames{ ^data.keys; }
 
-	analysisArgs { ^analysisArgs.asArray; }
+	// analysisArgs { ^analysisArgs.asArray; }
 
 	//returns boolean true if data was valid
 	setData{arg arr;
